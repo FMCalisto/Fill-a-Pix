@@ -1,0 +1,50 @@
+; GRUPO 17
+;
+; Bruno Oliveira
+; 67371
+;
+; Daniel da Costa
+; 69720
+;
+; Francisco Maria Calisto
+; 70916
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;ESTRUTURAS;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar n-current-task 0)
+  
+  
+; PROBLEMA
+; estado-inicial - root da arvore
+; solucao? - verifica se é estado final
+; accoes - tarefas a "escolher"
+; resultado - todas as escolhas possiveis
+; custo-caminho - total de horas ate aquele ponto
+ 
+ (defstruct problem
+	initial-state
+	solution
+	actions
+	result
+	tree-cost)
+
+	
+; INFO-NO
+; estrutura que guarda o pai e filhos de um determinado no
+
+(defstruct no
+	state
+	task
+	father	
+	h
+	g)
+
+	
+; SATISFACAO DE RESTRICOES
+
+(defstruct csp 
+	variaveis 
+	dominios 
+	restricoes)
