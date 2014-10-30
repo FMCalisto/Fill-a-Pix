@@ -4,7 +4,8 @@
 ;;; recebe um array de duas dimensoes correspondente a uma solucao para um problema fill-a-pix, 
 ;;; ou seja um array que para cada casa ou tem o valor 0 para indicar que a casa nao deve ser drawda,
 ;;; ou tem o valor 1 indicando que a casa deve ser drawda. draw a imagem no ecra.
-;;; 
+;;;
+cenas
 (defun draw-fill-a-pix (board)
 	(draw-line-exterior board)
 	(dotimes (line (array-dimension board 0))
