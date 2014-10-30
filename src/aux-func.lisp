@@ -9,33 +9,38 @@
 ; Francisco Maria Calisto
 ; 70916
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;FUNCOES AUXILIARES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ======================================================================================== ;
+;                                      FUNCOES AUXILIARES                                  ;
+; ======================================================================================== ;
+
+; Funcoes de auxilio a implementacao do jogo Fill-a-Pix.
 		
 
-; list-nth-delete
-; elimina item da posição nth da lista
-; o primeiro elemento da lista é 1
+; ELIMINA O NTH DA LISTA
+
+; Elimina item da posição nth da lst.
+; O primeiro elemento da lst é 1.
 
 (defun list-nth-delete(n list)
   (append (subseq list 0 (1- n)) (nthcdr n list)))
-  
 
-; list-nth-insert
-; Função que recebe um elemento, uma lista e uma posição 
-; e retorna uma nova lista que contém o elemento na      
-; desejada. 
-; o primeiro elemento da lista é 1
+
+; INSERE O NTH DA LISTA
+
+; Função que recebe um elemento, uma lst e uma posição 
+; e retorna uma nova lst que contém o elemento na      
+; desejada.
+; O primeiro elemento da lst é 1.
 
 (defun list-nth-insert(elem lst pos)
     (if (or (eql pos 1) (eql lst nil))
             (cons elem lst)
             (cons (car lst) (list-nth-insert elem (cdr lst) (- pos 1)))))
 
-            
-; list-last-delete
-; retorna a mesma lista, mas sem o ultimo elemento
+
+; ELIMINA ULTIMO
+
+; Retorna a mesma lst, mas sem o ultimo elemento.
 
 (defun list-last-delete(lst)
   (cond ((null lst) nil)
@@ -43,24 +48,28 @@
         (t (cons (car lst) (list-last-delete (cdr lst)))))) 
 
 
-; list-elem-in
-; retorna true se x pertencer a lista l
+; ELEMENTO EM LISTA
+
+; Retorna true se x belongsr a lst l.
 
 (defun list-elem-in(elem lst)
   (cond ((null lst) NIL)
-        (t (or (equal el (car lista)) (pertence-a-lista el (cdr lista)))))
+        (t (or (equal el (car lst)) (belongs-a-lst el (cdr lst)))))
 
 )
 
 
-; list-equal
-; recebe duas listas (subtarefas) e verificas se são iguais
+; LISTAS IGUAIS
+
+; Recebe duas lsts (subtarefas) e verifica se sao iguais.
 
 (defun list-equal (lst1 lst2)
 	(let ((answer T))
 		(if (equal (list-length lst1) (list-length lst2))
 			(if (null lst1) (setf answer NIL) (if (null lst2) (setf answer NIL)
-				(cond ((and (= (nth 0 lst1) (nth 0 lst2)) (= (nth 1 lst1) (nth 1 lst2)) (eql (nth 2 lst1) (nth 2 lst2))) (setf answer T)) 
+				(cond ((and (= (nth 0 lst1) (nth 0 lst2))
+				      (= (nth 1 lst1) (nth 1 lst2)) (eql (nth 2 lst1) (nth 2 lst2)))
+				        (setf answer T)) 
 					   (t (setf answer NIL)))
 				))
 			(setf answer NIL)
@@ -70,19 +79,20 @@
 )
 
 
-; equal-alt
-; retorna true se alt1 e alt2 forem iguais
+; ALTERNATIVAS IGUAIS
+
+; Retorna true se alt1 e alt2 forem iguais.
 
 (defun equal-alt (alt1 alt2)
-	(let ((list-equal T) (indice 0))
+	(let ((list-equal T) (i 0))
 		(loop	
 			(if (equal (list-length alt1) (list-length alt2))
 				(progn 						
-					(if (list-equal (nth indice alt1) (nth indice alt2))
+					(if (list-equal (nth i alt1) (nth i alt2))
 						(progn 
 							(setf list-equal T) 
-							(setf indice (+ 1 indice)) 
-							(if (>= indice (- (list-length alt1) 1)) 
+							(setf i (+ 1 i)) 
+							(if (>= i (- (list-length alt1) 1)) 
 								(return-from equal-alt T)))
 						(progn 
 							(setf list-equal NIL)
@@ -100,194 +110,233 @@
 	)
 )
 
-;ESTADOS IGUAIS
-;retorna true se os dois estados recebidos como argumentos sao iguais
-(defun estados-iguais (est1 est2)
-	(let ((lista-aux ()) (indice 0))
-		(if (equal (list-length est1) (list-length est2))
+
+; ESTADOS IGUAIS
+
+; Retorna true se os dois states recebidos como argumentos sao iguais, false caso contrario.
+
+(defun stats-equal (sta1 sta2)
+	(let ((lst-aux ()) (i 0))
+		(if (equal (list-length sta1) (list-length sta2))
 			(progn
-				(setf lista-aux (make-list (list-length est1) :initial-element 'NIL))
-				(dolist (alt1 est1)
-					(dolist (alt2 est2)
+				(setf lst-aux (make-list (list-length sta1) :initial-element 'NIL))
+				(dolist (alt1 sta1)
+					(dolist (alt2 sta2)
 						(if (equal-alt alt1 alt2)
 							(progn
-								(setf lista-aux (elimina-nth-lista (+ 1 indice) lista-aux))
-								(setf lista-aux (insere-nth-lista 'T lista-aux (+ 1 indice)))
+								(setf lst-aux (list-nth-delete (+ 1 i) lst-aux))
+								(setf lst-aux (list-nth-insert 'T lst-aux (+ 1 i)))
 							)
 						)
 					)
-					(setf indice (+ 1 indice))
+					(setf i (+ 1 i))
 				)
 			)
-			(return-from estados-iguais NIL)
+			(return-from stats-equal NIL)
 		)
-		(dolist (aux lista-aux)
+		(dolist (aux lst-aux)
 			(if (equal aux 'NIL)
-				(return-from estados-iguais NIL)
+				(return-from stats-equal NIL)
 			)
 		)
-		(return-from estados-iguais T)
+		(return-from stats-equal T)
 	)
 )
 
-;ESTA-NA-LISTA
-;recebe um estado e retorna true se o estado estiver na lista-estados
-(defun esta-na-lista (estado lista-estados)
-	(let ((pertence T) (estado-es (no-estado estado)))
-			(dolist (no-lst lista-estados)
-				(if (and estado-es no-lst)
+
+; PROCURA NA LISTA DE ESTADOS
+
+; Recebe um state e retorna true se o state estiver na lst-states.
+
+(defun list-is-in (state lst-states)
+	(let ((belongs T) (state-is (in-state state)))
+			(dolist (in-lst lst-states)
+				(if (and state-is in-lst)
 					(progn
-						(if (estados-iguais estado-es (no-estado no-lst))
-							(progn (setf pertence T) (return-from esta-na-lista pertence))
-							(setf pertence NIL)) 
+						(if (stats-equal state-is (in-state in-lst))
+							(progn (setf belongs T) (return-from list-is-in belongs))
+							(setf belongs NIL)) 
 					)
 				)
 			)
-		(return-from esta-na-lista pertence)
+		(return-from list-is-in belongs)
 	)
 )
 
-;VERIFICA
-;recebe duas subtarefas e verifica se sao validas juntas
-(defun verifica (lst1 lst2)
-	(cond ((and (= (nth 0 lst1) (nth 0 lst2)) (/= (nth 1 lst1) (nth 1 lst2)) (not (eql (nth 2 lst1) (nth 2 lst2)))) T) 	;mm dia, hora dif, id dif
-		  ((and (/= (nth 0 lst1) (nth 0 lst2)) (/= (nth 1 lst1) (nth 1 lst2)) (not (eql (nth 2 lst1) (nth 2 lst2)))) T) ;dia dif, hora dif, id dif
-		  ((and (= (nth 0 lst1) (nth 0 lst2)) (= (nth 1 lst1) (nth 1 lst2)) (eql (nth 2 lst1) (nth 2 lst2))) T) 		;mm dia, mm hora, mm id
-		  ((and (/= (nth 0 lst1) (nth 0 lst2)) (= (nth 1 lst1) (nth 1 lst2)) (not (eql (nth 2 lst1) (nth 2 lst2)))) T) 	;dia dif, mm hora, id dif
+
+; TAREFA VALIDA
+
+; Recebe duas subtarefas e checks se sao validas juntas.
+
+(defun checks (lst1 lst2)
+	(cond ((and (= (nth 0 lst1) (nth 0 lst2)) (/= (nth 1 lst1) (nth 1 lst2)) (not (eql (nth 2 lst1) (nth 2 lst2)))) T)
+		  ((and (/= (nth 0 lst1) (nth 0 lst2)) (/= (nth 1 lst1) (nth 1 lst2)) (not (eql (nth 2 lst1) (nth 2 lst2)))) T)
+		  ((and (= (nth 0 lst1) (nth 0 lst2)) (= (nth 1 lst1) (nth 1 lst2)) (eql (nth 2 lst1) (nth 2 lst2))) T)
+		  ((and (/= (nth 0 lst1) (nth 0 lst2)) (= (nth 1 lst1) (nth 1 lst2)) (not (eql (nth 2 lst1) (nth 2 lst2)))) T)
 		  (t NIL))
 )
 
 
-;MY-REMOVE
-;recebe um elemento e uma lista
-;remove esse elemento da lista
+; REMOVE ELEMENTO DA LISTA
+
+; Recebe um elemento e uma lst.
+; Remove esse elemento da lst.
+
 (defun my-remove (x l)
   (cond ((null l) nil) 
         (t (if (equal x (car l))  
                (my-remove x (cdr l))  
                (cons (car l) (my-remove x (cdr l)))))))
+               
 
-;POE-POR-ORDEM
-;funcao que recebe uma subtarefa e um alista e coloca a subtarefa por ordem crescente de dia e hora
-(defun poe-por-ordem (subt lista)
+; ORDENA LISTA
+
+; Funcao que recebe uma subtarefa e um alst e coloca a subtarefa por ordem crescente de dia e hora.
+
+(defun list-sort (subt lst)
 	(let ((n 1))
-		(dolist (subt2 lista)
-			(if (or (and (< (nth 0 subt) (nth 0 subt2)) (< (nth 1 subt) (nth 1 subt2))) (< (nth 0 subt) (nth 0 subt2)))
+		(dolist (subt2 lst)
+			(if (or (and (< (nth 0 subt) (nth 0 subt2))
+			             (< (nth 1 subt) (nth 1 subt2)))
+              (< (nth 0 subt) (nth 0 subt2)))
 					
 				(progn 
-					(setf lista (insere-nth-lista subt lista n))
-					(return-from poe-por-ordem lista)
+					(setf lst (list-nth-insert subt lst n))
+					(return-from list-sorte lst)
 				)
 				(setf n (+ 1 n)))
 		)
-		(setf lista (insere-nth-lista subt lista n))
-		(return-from poe-por-ordem lista)
+		(setf lst (list-nth-insert subt lst n))
+		(return-from list-sorte lst)
 	)
 )
-			   
-;COLOCA ELEMENTO POR ORDEM
-;Coloca um elemento na lista por ordem
-(defun coloca-el-por-ordem (el lista)
+
+
+; COLOCA ELEMENTO NA LISTA POR ORDEM
+
+; Coloca um elemento na lst por ordem.
+
+(defun list-insert-elem (el lst)
 	(let ((n 1))
-		(dolist (e lista)
-			(if (< (no-g el) (no-g e))
+		(dolist (e lst)
+			(if (< (in-g el) (in-g e))
 				(progn 
-					(setf lista (insere-nth-lista el lista n))
-					(return-from coloca-el-por-ordem lista)
+					(setf lst (list-nth-insert el lst n))
+					(return-from list-insert-elem lst)
 				)
 				(setf n (+ 1 n)))
 		)
-		(setf lista (insere-nth-lista el lista n))
-		(return-from coloca-el-por-ordem lista)
+		(setf lst (list-nth-insert el lst n))
+		(return-from list-insert-elem lst)
 	)
 )		
 
-;COLOCA LISTA POR ORDEM
-;Coloca uma lista na outra, com os elementos ordenados
-(defun coloca-por-ordem (sucessores sucessores_gerados)
-	(dolist (ger sucessores_gerados)
-		(setf sucessores(coloca-el-por-ordem ger sucessores))
+
+; INSERE LISTA EM ORDEM NOUTRA LISTA - NOT GREEDY
+
+; Coloca uma lista na outra, com os elementos ordenados.
+
+(defun list-insert-order (successors successors_generated)
+	(dolist (gen successors_generated)
+		(setf successors(list-insert-elem gen successors))
 	)
-	(return-from coloca-por-ordem sucessores)
+	(return-from list-insert-order successors)
 )
 
-;COLOCA ELEMENTO POR ORDEM - GANANCIOSA
-;Coloca um elemento na lista por ordem
-(defun coloca-el-por-ordem-gananciosa (el lista)
+
+; COLOCA ELEMENTO POR ORDEM - GREEDY
+
+; Coloca um elemento na lst por ordem.
+
+(defun list-insert-elem-greedy (el lst)
 	(let ((n 1))
-		(dolist (e lista)
+		(dolist (e lst)
 			(if (< (no-h el) (no-h e))
 				(progn 
-					(setf lista (insere-nth-lista el lista n))
-					(return-from coloca-el-por-ordem-gananciosa lista)
+					(setf lst (list-nth-insert el lst n))
+					(return-from list-insert-elem-greedy lst)
 				)
 				(setf n (+ 1 n)))
 		)
-		(setf lista (insere-nth-lista el lista n))
-		(return-from coloca-el-por-ordem-gananciosa lista)
+		(setf lst (list-nth-insert el lst n))
+		(return-from list-insert-elem-greedy lst)
 	)
 )		
 
-;COLOCA LISTA POR ORDEM - GANANCIOSA
-;Coloca uma lista na outra, com os elementos ordenados
-(defun coloca-por-ordem-gananciosa (sucessores sucessores_gerados)
-	(dolist (ger sucessores_gerados)
-		(setf sucessores(coloca-el-por-ordem-gananciosa ger sucessores))
+
+; COLOCA UMA DADA LISTA POR ORDEM - GREEDY
+
+; Coloca uma lst na outra, com os elementos ordenados.
+
+(defun list-insert-order-greedy (successors successors_generated)
+	(dolist (gen successors_generated)
+		(setf successors(list-insert-elem-greedy gen successors))
 	)
-	(return-from coloca-por-ordem-gananciosa sucessores)
+	(return-from list-insert-order-greedy successors)
 )
  
  
-;COLOCA ELEMENTO POR ORDEM - A*
-;Coloca um elemento na lista por ordem
-(defun coloca-el-por-ordem-A (el lista)
+; COLOCA ELEMENTO POR ORDEM - A*
+
+; Coloca um elemento na lst por ordem.
+
+(defun list-insert-elem-A (el lst)
 	(let ((n 1))
-		(dolist (e lista)
-			(if (< (+ (no-g el) (no-h el)) 
-					(+ (no-g e) (no-h e)))
+		(dolist (e lst)
+			(if (< (+ (in-g el) (in-h el)) 
+					(+ (in-g e) (in-h e)))
 				(progn 
-					(setf lista (insere-nth-lista el lista n))
-					(return-from coloca-el-por-ordem-A lista)
+					(setf lst (list-nth-insert el lst n))
+					(return-from list-insert-elem-A lst)
 				)
 				(setf n (+ 1 n)))
 		)
-		(setf lista (insere-nth-lista el lista n))
-		(return-from coloca-el-por-ordem-A lista)
+		(setf lst (list-nth-insert el lst n))
+		(return-from list-insert-elem-A lst)
 	)
 )		
 
-;COLOCA LISTA POR ORDEM -A*
-;Coloca uma lista na outra, com os elementos ordenados
-(defun coloca-por-ordem-A (sucessores sucessores_gerados)
-	(dolist (ger sucessores_gerados)
-		(setf sucessores(coloca-el-por-ordem-A ger sucessores))
+
+; COLOCA LISTA POR ORDEM - A*
+
+; Coloca uma lst na outra, com os elementos ordenados.
+
+(defun list-insert-order-A (successors successors_generated)
+	(dolist (gen successors_generated)
+		(setf successors(list-insert-elem-A gen successors))
 	)
-	(return-from coloca-por-ordem-A sucessores)
+	(return-from list-insert-order-A successors)
 )
 
-;VERIFICA-SOLUCAO
-;verifica se o estado recebido e solucao final
-(defun verifica-solucao1 (estado)
-	(let ((x (no-tarefas estado)) (estado-actual (no-estado estado)) (ntarefa 0))
-		(dolist (alt estado-actual)
-			(dolist (tar x)
-				(if (pertence-a-lista alt tar)
-					(setq x (elimina-nth-lista (+ 1 ntarefa) x)) 
-					(setq ntarefa (+ 1 ntarefa))
+
+; VERIFICA SE E SOLUCAO
+
+; Verifica se o state recebido e solucao final do problema.
+
+(defun checks-sol1 (state)
+	(let ((x (in-tasks state)) (state-current (in-state state)) (ntask 0))
+		(dolist (alt state-current)
+			(dolist (task x)
+				(if (belongs-a-lst alt tar)
+					(setq x (list-nth-delete (+ 1 ntask) x)) 
+					(setq ntask (+ 1 ntask))
 				)
 			)
-			(setq ntarefa 0)
+			(setq ntask 0)
 		)
-		(setf (no-tarefas estado) x)
-		(if (not x) (return-from verifica-solucao1 T) (return-from verifica-solucao1 NIL))
+		(setf (in-tasks state) x)
+		(if (not x) (return-from checks-sol1 T) (return-from checks-sol1 NIL))
 	)
 ) 
 
-;VERIFICA SE E SOLUCAO - CPS
-;verifica se uma lista é solucao para o problema de satisfaçao de restriçoes
-(defun verifica-se-e-solucao (lista)
-	(dolist (alt lista)
-		(if (equal 'T alt) (return-from verifica-se-e-solucao NIL))
+
+; VERIFICA SE E SOLUCAO - CPS
+
+; Verifica se uma dada lista e solucao para o problema de satisfacao de restricoes.
+
+(defun checks-if-sol (lst)
+	(dolist (alt lst)
+		(if (equal 'T alt) (return-from checks-if-sol NIL))
 	)
-	(return-from verifica-se-e-solucao T)
+	(return-from checks-if-sol T)
 )
