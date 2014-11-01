@@ -10,20 +10,21 @@
 ; 70916
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;ESTRUTURAS;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ======================================================================================== ;
+;                                           ESTRUTURAS                                     ;
+; ======================================================================================== ;
 
 
 (defvar n-current-task 0)
   
   
 ; PROBLEMA
-; initial-state - root da arvore
-; solution - verifica se é estado final
-; actions - tarefas a "escolher"
-; result - todas as escolhas possiveis
-; tree-cost - total de horas ate aquele ponto
+
+; initial-state - root da arvore;
+; solution - verifica se e estado final;
+; actions - tarefas a "escolher";
+; result - todas as escolhas possiveis;
+; tree-cost - total de horas ate aquele ponto.
  
  (defstruct problem
 	initial-state
@@ -34,7 +35,8 @@
 
 	
 ; INFO-NO
-; estrutura que guarda o pai e filhos de um determinado no
+
+; Estrutura que guarda o pai e filhos de um determinado no.
 
 (defstruct no
 	state
@@ -46,7 +48,7 @@
 	
 ; SATISFACAO DE RESTRICOES
 
-(defstruct csp 
+(defstruct psr 
 	variaveis 
 	dominios 
 	restricoes)

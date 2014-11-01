@@ -9,11 +9,12 @@
 ; Francisco Maria Calisto
 ; 70916
 
+
 ; ======================================================================================== ;
 ;                                         Tipo Restricao                                   ;
 ; ======================================================================================== ;
 
-; O tipo Restricao e utilizado para representar uma restricao de um PSR
+; O tipo Restricao e utilizado para representar uma restricao de um PSR.
 
 
 ; LOAD
@@ -21,6 +22,7 @@
 ; Chamada dos Ficheiros
 
 (load "aux-func.lisp")
+(load "setructures.lisp")
 
 
 ; CRIA RESTRICAO
