@@ -22,7 +22,7 @@
 ; Chamada dos Ficheiros
 
 (load "aux-func.lisp")
-(load "setructures.lisp")
+(load "structures.lisp")
 
 
 ; CRIA RESTRICAO
