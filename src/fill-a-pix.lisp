@@ -182,10 +182,9 @@
        (dotimes (i maxsz (PSR-listvars psr))
             (setf (gethash (nth i (PSR-listvars psr)) myhashtable)
             			(nth i (PSR-listvalues psr)))
-            ;;(print (nth i (PSR-listvalues psr)))
             )
      (gethash var myhashtable)       
-    )  
+    )
 )
 
 
@@ -238,6 +237,8 @@
 ;
 ; Talvez nao seja para utilizar estas funcoes para ja.
 ;
+; =====> REVER AS SEGUINTES FUNCOES <=====
+;
 ; ======================================================================================= ;
 
 
@@ -248,16 +249,46 @@
 ; Se a variavel ja tinha sido atribuida, o novo valor substitui o valor anterior.
 ; O valor de retorno desta funcao nao esta definido.
 
+
+
+(defun psr-adiciona-atribuicao2! (psr var val)
+	(defparameter *myhashtable* (make-hash-table :test 'equal))
+  (let ((maxsz (list-length (PSR-listvars psr)))
+  	)
+     (dotimes (i maxsz (PSR-listvars psr))
+        (if (gethash var *myhashtable*)
+        	(setf (remhash var *myhashtable*) val)
+        )
+  		)
+	)
+	(setf (gethash var *myhashtable*) val)
+)
+
 (defun psr-adiciona-atribuicao! (psr var val)
 	(defparameter *myhashtable* (make-hash-table :test 'equal))
-    (let ( (maxsz (list-length (PSR-listvars psr))) )
-       (dotimes (i maxsz (PSR-listvars psr))
-          (if ((setq val (gethash var myhashtable)))
-          	(puthash var val myHash)
-          )
+	(loop for var being the hash-keys of *myhashtable*
+    	using (hash-value val)
+    do (setf (gethash var *myhashtable*) val))
+	(gethash var *myhashtable*)
+)
+
+
+(defun append-hash (key value hashtable)
+	(defparameter *myhashtable* (make-hash-table :test 'equal))
+  (let ((current (gethash key *myhashtable*)))
+    (puthash key 
+             (cond
+              ((null current) (list value))
+              ((listp current) (cons value current))
+              (t current)) 
+             *myhashtable*)
     )
   )
-)
+
+
+; ======================================================================================= ;
+; ======================================================================================= ;
+; ======================================================================================= ;
 
 
 ; REMOVE ATRIBUICAO
