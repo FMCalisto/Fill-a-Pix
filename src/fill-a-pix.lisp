@@ -10,31 +10,86 @@
 ; 70916
 
 
-; ======================================================================================== ;
-;                                              PSR                                         ;
-; ======================================================================================== ;
+
+; ======================================================================================= ;
+;                                             NOTAS                                       ;
+; ======================================================================================= ;
+
+;; Test using "clisp -i tipos_de_dados.lisp -i exemplos.lisp < test01/input" by RZL
+
+
+
+
+; ======================================================================================= ;
+;                               DEFINICAO DAS ESTRUTURAS DE DADOS                         ;
+; ======================================================================================= ;
+
+
+(defun check-CSP (p lst)
+    (cond 
+    (   (null lst)           NIL   )
+    (   (funcall p (first lst))  T )
+    (  T (check-CSP p  (rest lst)) )
+    )
+)
+
+
+(defstruct restricao 
+    (listvars NIL)
+    (pred NIL)
+)
+
+
+
+
+; ======================================================================================= ;
+;                                        TIPO RESTRICAO                                   ;
+; ======================================================================================= ;
+
+; O tipo Restricao tem como argumentos uma lista de variaveis e um predicado que avalia
+; se uma dada CSP e valida ou nao.
+; O predicado ira ter que chamar a funcao check-CSP para que assim construa a restricao.
+
+
+(defun cria-restricao (lstvars predi)
+	(
+    setf x (make-restricao :listvars lstvars :pred predi)
+  )
+  x
+)
+
+
+(defun restricao-variaveis (r)
+	(
+    restricao-listvars r
+  )
+)
+
+
+(defun restricao-funcao-validacao (r)
+	(
+    restricao-pred r
+  )
+)
+
+(defstruct PSR
+    (listvars NIL)
+    (listdomains NIL)
+    (listconstrains NIL)
+    
+    (listvalues NIL)
+)
+
+
+
+
+; ======================================================================================= ;
+;                                              PSR                                        ;
+; ======================================================================================= ;
 
 ; O tipo Problema de Satisfacao de Restricoes (PSR) e utilizado para representar
 ; um problema de satisfacao de restricoes, que guarda informacao acerca das variaveis,
 ; dominios e restricoes de um Problema de Satisfacao de Restricoes (PSR).
-
-
-
-; ======================================================================================== ;
-;                                            APAGAR                                        ;
-; ======================================================================================== ;
-
-; LOAD
-
-; Chamada dos Ficheiros
-
-(load "aux-func.lisp")
-(load "structures.lisp")
-(load "restricao.lisp")
-
-; ======================================================================================== ;
-; ======================================================================================== ;
-; ======================================================================================== ;
 
 
 ; LISTAS A USAR
@@ -75,18 +130,19 @@
 
 (defun psr-atribuicoes (psr)
 	(let ((maxsz (list-length (PSR-listvars psr))) 
-				(myhashtable (make-hash-table :test 'equal))
+		  	(myhashtable (make-hash-table :test 'equal))
 					(answ ())
 				)
 
-		(dotimes (i maxsz (PSR-listvars psr))
-			(setf answ
-				(append answ (list (cons (nth i (PSR-listvars psr))
-										 						 (list (nth i (PSR-listvalues psr)))
-										 				)
-											)
-			))
-		(PSR-listvalues psr))
+				(dotimes (i maxsz (PSR-listvars psr))
+					(setf answ
+						(append answ (list (cons (nth i (PSR-listvars psr))
+																		 (list (nth i (PSR-listvalues psr)))
+																)
+													)
+						)
+					)
+				(PSR-listvalues psr))
 	)
 	answ
 )
@@ -160,8 +216,8 @@
 
 (defun psr-variavel-restricao (psr key)
     (defparameter *myhashtable* (make-hash-table :test 'equal))
-    (let ( (maxsz (list-length (PSR-listconstrains psr))) 
-     )
+    (let ((maxsz (list-length (PSR-listconstrains psr))) 
+     			)
        
        (dotimes (i maxsz (PSR-listconstrains psr))
             (setf (gethash (nth i (PSR-listconstrains psr)) *myhashtable*)
@@ -173,13 +229,16 @@
 )
 
 
-; ======================================================================================== ;
+
+
+; ======================================================================================= ;
 ;											/ APAGAR \
 ;
 ; NOTA: tentar compreender como funcionam as funcoes sem retorno...
 ;
 ; Talvez nao seja para utilizar estas funcoes para ja.
-; ======================================================================================== ;
+;
+; ======================================================================================= ;
 
 
 ; ADICIONA ATRIBUICAO
@@ -189,9 +248,16 @@
 ; Se a variavel ja tinha sido atribuida, o novo valor substitui o valor anterior.
 ; O valor de retorno desta funcao nao esta definido.
 
-(defun psr-adiciona-atribuicao! (psr var)
-
-	)
+(defun psr-adiciona-atribuicao! (psr var val)
+	(defparameter *myhashtable* (make-hash-table :test 'equal))
+    (let ( (maxsz (list-length (PSR-listvars psr))) )
+       (dotimes (i maxsz (PSR-listvars psr))
+          (if ((setq val (gethash var myhashtable)))
+          	(puthash var val myHash)
+          )
+    )
+  )
+)
 
 
 ; REMOVE ATRIBUICAO
@@ -262,7 +328,9 @@
 	)
 
 
-; ======================================================================================== ;
+
+
+; ======================================================================================= ;
 ;											/ APAGAR \
 ;
 ; RETORNO: logico, inteiro
@@ -272,7 +340,7 @@
 ;
 ; inteiro: n dos testes de consistencia.
 ;
-; ======================================================================================== ;
+; ======================================================================================= ;
 
 
 ; PSR ATRIBUICAO CONSISTENTE
