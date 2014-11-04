@@ -39,6 +39,9 @@
     (pred NIL)
 )
 
+;;Hashtable global (testing)
+(defparameter myhashtable (make-hash-table :test 'equal))
+
 
 
 
@@ -53,23 +56,23 @@
 
 (defun cria-restricao (lstvars predi)
 	(
-    setf x (make-restricao :listvars lstvars :pred predi)
-  )
-  x
+		setf x (make-restricao :listvars lstvars :pred predi)
+	)	
+	x
 )
 
 
 (defun restricao-variaveis (r)
 	(
-    restricao-listvars r
-  )
+		restricao-listvars r
+	)
 )
 
 
 (defun restricao-funcao-validacao (r)
 	(
-    restricao-pred r
-  )
+		restricao-pred r
+	)
 )
 
 (defstruct PSR
@@ -109,17 +112,24 @@
 
 (defun cria-psr (varsl domainsl constrainsl)
 	(let ((maxsz (list-length varsl)) 
-				(myhashtable (make-hash-table))
+				(valuesl NIL)
 				)
 
 			(dotimes (i maxsz varsl)
-				(setf (gethash (nth i varsl) myhashtable) NIL))
-	)
-	(setf x (make-PSR
+				(setf (gethash (nth i varsl) myhashtable) NIL)
+				
+				)
+						
+				(dotimes (i maxsz varsl)
+				(setf valuesl (append valuesl (list NIL)))
+				)
+				
+			(setf x (make-PSR
 						:listvars varsl
 						:listdomains domainsl
 						:listconstrains constrainsl
-						:listvalues NIL))
+						:listvalues valuesl))
+	)		
 	x
 )
 
@@ -130,7 +140,7 @@
 
 (defun psr-atribuicoes (psr)
 	(let ((maxsz (list-length (PSR-listvars psr))) 
-		  	(myhashtable (make-hash-table :test 'equal))
+		  	;;(myhashtable (make-hash-table :test 'equal))
 					(answ ())
 				)
 
@@ -154,8 +164,8 @@
 ; independentemente de estarem ou nao atribuidas.
 
 (defun psr-variaveis-todas (psr)
-
-	)
+	(PSR-listvars psr)
+)
 
 
 ; VARIAVEIS NAO ATRIBUIDAS
@@ -164,8 +174,16 @@
 ; ainda nao foram atribuidas.
 
 (defun psr-variaveis-nao-atribuidas (psr)
-
+	(let ((maxsz (list-length (PSR-listvars psr)))
+		  (lst NIL))
+		(dotimes (i maxsz (PSR-listvars psr))
+			(if (equal (nth i (PSR-listvalues psr)) NIL)
+				(setf lst (append lst (list (nth i (PSR-listvars psr)))))
+			)
+		)
+		lst
 	)
+)
 
 
 ; VALOR DA VARIAVEL
@@ -176,7 +194,7 @@
 
 (defun psr-variavel-valor (psr var)
 (let ( (maxsz (list-length (PSR-listvars psr))) 
-       (myhashtable (make-hash-table :test 'equal))
+       ;;(myhashtable (make-hash-table :test 'equal))
      )
        
        (dotimes (i maxsz (PSR-listvars psr))
@@ -250,40 +268,18 @@
 ; O valor de retorno desta funcao nao esta definido.
 
 
-
-(defun psr-adiciona-atribuicao2! (psr var val)
-	(defparameter *myhashtable* (make-hash-table :test 'equal))
-  (let ((maxsz (list-length (PSR-listvars psr)))
-  	)
-     (dotimes (i maxsz (PSR-listvars psr))
-        (if (gethash var *myhashtable*)
-        	(setf (remhash var *myhashtable*) val)
-        )
-  		)
-	)
-	(setf (gethash var *myhashtable*) val)
-)
-
 (defun psr-adiciona-atribuicao! (psr var val)
-	(defparameter *myhashtable* (make-hash-table :test 'equal))
-	(loop for var being the hash-keys of *myhashtable*
-    	using (hash-value val)
-    do (setf (gethash var *myhashtable*) val))
-	(gethash var *myhashtable*)
+	(let ((maxsz (list-length (PSR-listvars psr))) )
+
+				(dotimes (i maxsz (PSR-listvars psr))
+					(if (equal (nth i (PSR-listvars psr)) var) 
+						(setf (nth i (PSR-listvalues psr)) val)
+					)
+				)
+	)
 )
 
 
-(defun append-hash (key value hashtable)
-	(defparameter *myhashtable* (make-hash-table :test 'equal))
-  (let ((current (gethash key *myhashtable*)))
-    (puthash key 
-             (cond
-              ((null current) (list value))
-              ((listp current) (cons value current))
-              (t current)) 
-             *myhashtable*)
-    )
-  )
 
 
 ; ======================================================================================= ;
@@ -301,8 +297,15 @@
 
 
 (defun psr-remove-atribuicao! (psr var)
+	(let ((maxsz (list-length (PSR-listvars psr))) )
 
+				(dotimes (i maxsz (PSR-listvars psr))
+					(if (equal (nth i (PSR-listvars psr)) var) 
+						(setf (nth i (PSR-listvalues psr)) NIL)
+					)
+				)
 	)
+)
 
 
 ; ALTERA DOMINIO
@@ -314,9 +317,15 @@
 ; O valor de retorno desta funcao nao esta definido.
 
 
-(defun psr-altera-dominio! (psr var)
-
+(defun psr-altera-dominio! (psr var dom)
+	(let ((maxsz (list-length (PSR-listvars psr))) )
+		(dotimes (i maxsz (PSR-listvars psr))
+			(if (equal (nth i (PSR-listvars psr)) var) 
+				(setf (nth i (PSR-listdomains psr)) dom)
+			)
+		)
 	)
+)
 
 
 ; PSR COMPLETO
@@ -326,8 +335,18 @@
 ; Retorna NIL caso contrario.
 
 (defun psr-completo-p (psr)
-
+	(let ((maxsz (list-length (PSR-listvars psr)))
+	       (flagged 1))
+		(dotimes (i maxsz (PSR-listvars psr))
+			(if (equal (nth i (PSR-listvalues psr)) NIL)
+			(setf flagged 0)
+			)
+		)
+		(if (equal flagged 1)
+			T
+		)
 	)
+)
 
 
 ; PSR CONSISTENTE
@@ -341,8 +360,17 @@
 
 
 (defun psr-consistente-p (psr)
-
-	)
+;;Recebe-se uma PSR e temos de avaliar TODAS as restrições sobre TODOS os valores das vars
+;;verificar os valores das variaveis. Se tudo for consistente = T else NIL
+	
+	(let ((maxsz (list-length (PSR-listvars psr)))
+		  (answ ()))
+	(dotimes (i maxsz (PSR-listvars psr))
+		(nth i (PSR-listconstrains psr))
+		;;(print (nth i (PSR-listconstrains psr))))
+		(append answ (list (nth i (PSR-listconstrains psr)))
+							))
+	answ))
 
 
 ; PSR VARIAVEL CONSISTENTE
@@ -381,7 +409,7 @@
 
 (defun psr-atribuicao-consistente-p (psr var val)
 
-	)
+)
 
 
 ; PSR ATRIBUICOES CONSISTENTES EM ARCO
