@@ -362,15 +362,17 @@
 (defun psr-consistente-p (psr)
 ;;Recebe-se uma PSR e temos de avaliar TODAS as restrições sobre TODOS os valores das vars
 ;;verificar os valores das variaveis. Se tudo for consistente = T else NIL
-	
+
 	(let ((maxsz (list-length (PSR-listvars psr)))
-		  (answ ()))
-	(dotimes (i maxsz (PSR-listvars psr))
-		(nth i (PSR-listconstrains psr))
-		;;(print (nth i (PSR-listconstrains psr))))
-		(append answ (list (nth i (PSR-listconstrains psr)))
-							))
-	answ))
+		  (lst NIL))
+		(dotimes (i maxsz (PSR-listvars psr))
+			(if (equal (nth i (PSR-listconstrains psr)) NIL)
+				(setf lst (append lst (list (nth i (PSR-listconstrains psr)))))
+			)
+		)
+		lst
+	)
+)
 
 
 ; PSR VARIAVEL CONSISTENTE
