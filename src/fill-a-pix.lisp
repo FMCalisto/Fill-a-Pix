@@ -212,7 +212,7 @@
 
 (defun psr-variavel-dominio (psr key)
     (defparameter *myhashtable* (make-hash-table :test 'equal))
-    (let ( (maxsz (list-length (PSR-listvars psr))) 
+    (let ( (maxsz (list-length (PSR-listvars psr)))
      )
        
        (dotimes (i maxsz (PSR-listvars psr))
@@ -270,9 +270,10 @@
 
 (defun psr-adiciona-atribuicao! (psr var val)
 	(let ((maxsz (list-length (PSR-listvars psr))) )
-
+				(setf (gethash var myhashtable)
+							val)
 				(dotimes (i maxsz (PSR-listvars psr))
-					(if (equal (nth i (PSR-listvars psr)) var) 
+					(if (equal (nth i (PSR-listvars psr)) var)
 						(setf (nth i (PSR-listvalues psr)) val)
 					)
 				)
@@ -359,20 +360,52 @@
 ;    necessarios para determinar a consistencia.
 
 
+#|
+
 (defun psr-consistente-p (psr)
 ;;Recebe-se uma PSR e temos de avaliar TODAS as restrições sobre TODOS os valores das vars
 ;;verificar os valores das variaveis. Se tudo for consistente = T else NIL
 
-	(let ((maxsz (list-length (PSR-listvars psr)))
-		  (lst NIL))
-		(dotimes (i maxsz (PSR-listvars psr))
-			(if (equal (nth i (PSR-listconstrains psr)) NIL)
-				(setf lst (append lst (list (nth i (PSR-listconstrains psr)))))
-			)
-		)
-		lst
+	(let ((maxsz (list-length (PSR-listconstrains psr)))
+		  (arr (make-array (list-length (PSR-listconstrains psr)))))
+		(dotimes (i maxsz (PSR-listconstrains psr))
+			(let ((maxsize (list-length (PSR-listvars psr)))
+				(dotimes (j maxsize (nth 0 (nth i (PSR-listconstrains psr))))
+					(setf (aref arr i) (cons (nth i (PSR-listconstrains psr))
+										(gethash (nth j
+												(nth 0 (nth i (PSR-listconstrains psr))))
+												myhashtable))))
+		)))
+		arr
 	)
-)
+) 
+
+|#
+
+(defun psr-consistente-p (psr)
+;;Recebe-se uma PSR e temos de avaliar TODAS as restrições sobre TODOS os valores das vars
+;;verificar os valores das variaveis. Se tudo for consistente = T else NIL
+
+	(let ((maxsz (list-length (PSR-listconstrains psr)))
+		  (arr (make-array (list-length (PSR-listconstrains psr))))
+		  (flag 1))
+		(dotimes (i maxsz (PSR-listconstrains psr))
+			(let (( maxszsublists (list-length (restricao-listvars (nth i (PSR-listconstrains psr))))))
+				;;(print (restricao-pred (nth i (PSR-listconstrains psr))) )
+				(setq fun (restricao-pred (nth i (PSR-listconstrains psr))) )
+				;;(print "dtyasfdsydf")
+				
+				(setf ans (funcall fun psr))
+				(if (equal ans NIL)
+					(setf flag 0))
+				;;(print fun)
+				;;(print "------------------------")
+				
+			))
+		(if (equal flag 1)
+			T)
+))
+
 
 
 ; PSR VARIAVEL CONSISTENTE
