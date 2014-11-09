@@ -10,7 +10,7 @@
 ; 70916
 
 ;;(compile-file "exemplos.lisp")    
-(load "exemplos.fas")       
+;;(load "exemplos.fas")       
 
 
 
@@ -594,7 +594,8 @@
 	 (setf sumaux soma) (if (and (<= sumaux valor) (>= (- 9 nzeros) valor)) T ))))
 	 
 	fun
-	))	
+	)
+)	
 
 (defun fill-a-pix->psr (arr)
 	(let (
@@ -623,7 +624,14 @@
 				(setf listadevars (append listadevars (list (write-to-string cont))))
 				
 				(if (not (equal NIL (aref arr i j) ))
-				(setf listaderestr (append listaderestr (list (cria-restricao (GetNeighboursOfArrayCell aux i j) (CriaPredicado aux i j) )) ) )
+				    (setf listaderestr
+				          (append listaderestr
+				                    (list (cria-restricao (GetNeighboursOfArrayCell aux i j)
+				                                          (CriaPredicado aux i j)
+                                          )
+                                    )
+                          )
+                    )
 				)
 				(incf cont)
 			)
@@ -648,15 +656,24 @@
 
 (defun procura-retrocesso-simples (psr)
   (cond ((notany #'zerop psr)
-     (if (psr-consistente-p psr)
+     (if (psr-atribuicoes psr)
          psr
          nil))
-    (t (let ((positions (fill-a-pix->psr psr)))
-         (loop for position in positions
-          do (loop for number in '(1 2 3 4 5 6 7 8 9)
+    (t (let ((vars (PSR-listvalues psr)))
+         (loop for var in vars
+          do (loop for val in '(1 2 3 4 5 6 7 8 9)
               do (let ((result (procura-retrocesso-simples
-                        (psr->fill-a-pix psr
-                            lin
-                            col))))
+                        (psr-atribuicao-consistente-p
+                            psr
+                            var
+                            val))))
                    (when result
-                 (return-from procura-retrocesso-simples result)))))))))
+                    (return-from procura-retrocesso-simples result)
+                   )
+                 )
+             )
+         )
+       )
+    )
+  )
+)
