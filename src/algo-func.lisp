@@ -10,6 +10,8 @@
 ; 70916
 
 
+
+
 ; ======================================================================================== ;
 ;                                   ALGORITMOS PARA FUNCOES                                ;
 ; ======================================================================================== ;
@@ -132,3 +134,28 @@
 	)
 	(return-from checks-if-sol T)
 )
+
+
+
+
+; ======================================================================================== ;
+;                                   ALGORITMOS DE PROCURA                                  ;
+; ======================================================================================== ;
+
+; Usa uma lista de 81 inteiros para pedir a resposta ao Fill-a-Pix,
+; cada numero esta compreendido de 1-9, 0 representa casa vazia.
+
+(defun procura-retrocesso-simples (psr)
+  (cond ((notany #'zerop psr)
+     (if (psr-consistente-p psr)
+         psr
+         nil))
+    (t (let ((positions (fill-a-pix->psr psr)))
+         (loop for position in positions
+          do (loop for number in '(1 2 3 4 5 6 7 8 9)
+              do (let ((result (procura-retrocesso-simples
+                        (psr->fill-a-pix psr
+                            lin
+                            col))))
+                   (when result
+                 (return-from procura-retrocesso-simples result)))))))))
