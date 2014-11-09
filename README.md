@@ -6,7 +6,7 @@ same directory where your project, and should put the following instructions at 
 of your project.
 
 ```
-(load (compile-file “examples.lisp”))
+(load (compile-file “exemplos.lisp”))
 ```
 
 The file examples provided also implements a function that can be used to draw 
