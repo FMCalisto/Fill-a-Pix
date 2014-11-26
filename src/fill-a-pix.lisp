@@ -31,7 +31,7 @@
 
 ;; (load "exemplos.fas")
 
-;; (load "exemplos.lisp")
+(load "exemplos.lisp")
 
 
 
@@ -39,15 +39,6 @@
 ; ======================================================================================= ;
 ;                               DEFINICAO DAS ESTRUTURAS DE DADOS                         ;
 ; ======================================================================================= ;
-
-
-(defun check-CSP (p lst)
-    (cond 
-    (   (null lst)           NIL   )
-    (   (funcall p (first lst))  T )
-    (  T (check-CSP p  (rest lst)) )
-    )
-)
 
 
 (defstruct restricao 
@@ -63,6 +54,17 @@
 
 (defparameter myhashtable (make-hash-table :test 'equal))
 (defparameter hashtable2 (make-hash-table :test 'equal))
+
+
+
+
+; ======================================================================================= ;
+; ======================================================================================= ;
+;                                                                                         ;
+;                                  PROJECT | FIRST PART                                   ;
+;                                                                                         ;
+; ======================================================================================= ;
+; ======================================================================================= ;
 
 
 
@@ -95,14 +97,6 @@
 (defun restricao-funcao-validacao (r)
 	(
 		restricao-pred r
-	)
-)
-
-(defun conjuntos-iguais-p (bag1 bag2)
-  (let ((table (make-hash-table :test 'equal)))
-    (loop for key in bag1 do (incf (gethash key table 0)))
-    (loop for key in bag2 do (decf (gethash key table 0)))
-    (loop for val being each hash-value of table always (= val 0))
 	)
 )
 
@@ -173,32 +167,35 @@
 
 (defun listOfPairsBuild (lst1 lst2)
   (loop for idx from 0
-        for item in lst1
-        collect (cons item (nth idx lst2))))
+  	for item in lst1
+  		collect (cons item (nth idx lst2))
+  )
+)
 
 
 (defun psr-atribuicoes (psr)
-	(let ((maxsz (list-length (PSR-listvars psr)))
+	(let
+		(
+			(maxsz (list-length (PSR-listvars psr)))
 		  (answ NIL)
-		  (answnnil NIL)
-		 ;; (tst 0)
-		  	
-					
-				)
+		  (answnnil NIL)					
+		)
 				
-				(setq answ (listOfPairsBuild (PSR-listvars psr) (PSR-listvalues psr)))
+		(setq
+			answ
+			(listOfPairsBuild (PSR-listvars psr) (PSR-listvalues psr))
+		)
 				
-				(dotimes (i maxsz (PSR-listvars psr))
-					(if (not (equal (cdr (nth i answ)) NIL) )
-						(setf answnnil (append answnnil (list (nth i answ))))
-				)
-		
-	)
-	(cond
-	     ( (equal (list-length answnnil) 0 ) NIL)
-	       (T answnnil) )
-	
-	
+		(dotimes (i maxsz (PSR-listvars psr))
+			(if (not (equal (cdr (nth i answ)) NIL) )
+				(setf answnnil (append answnnil (list (nth i answ))))
+			)
+		)
+
+		(cond
+			((equal (list-length answnnil) 0 ) NIL)
+				(T answnnil)
+		)	
 	)
 )
 
@@ -259,7 +256,7 @@
 
 (defun psr-variavel-dominio (psr key)
     (defparameter *myhashtable* (make-hash-table :test 'equal))
-    (let ( (maxsz (list-length (PSR-listvars psr)))
+    (let ((maxsz (list-length (PSR-listvars psr)))
            (answ2 NIL)
      			)
 				(dotimes (i maxsz (PSR-listvars psr))
@@ -316,7 +313,7 @@
 	(let ((maxsz (list-length (PSR-listvars psr))) )
 				(setf (gethash var myhashtable)
 							val)
-				(dotimes (i maxsz )
+				(dotimes (i maxsz );;(PSR-listvars psr))
 					(if (equal (nth i (PSR-listvars psr)) var)
 						(setf (nth i (PSR-listvalues psr)) val)
 					)
@@ -327,21 +324,26 @@
 
 ; REMOVE ATRIBUICAO
 
-; Este modificador recebe um PSR e uma variAvel,
+; Este modificador recebe um PSR e uma variavel,
 ; e altera o PSR recebido, removendo qualquer 
 ; atribuicao a variavel que tenha sido feita anteriormente.
-; A variavel passa efetivamente a nao estar atribuída.
+; A variavel passa efetivamente a nao estar atribuida.
 ; O valor de retorno desta funcao nao esta definido.
 
 
 (defun psr-remove-atribuicao! (psr var) 
-	(let ((maxsz (list-length (PSR-listvars psr))) )
-
-				(dotimes (i maxsz (PSR-listvars psr))
-					(if (equal (nth i (PSR-listvars psr)) var) 
-						(setf (nth i (PSR-listvalues psr)) NIL)
-					)
+	(let
+		(
+			(maxsz (list-length (PSR-listvars psr)))
+		)
+		(dotimes (i maxsz (PSR-listvars psr))
+			(if (equal (nth i (PSR-listvars psr)) var) 
+				(setf
+					(nth i (PSR-listvalues psr))
+					NIL
 				)
+			)
+		)
 	)
 )
 
@@ -373,20 +375,21 @@
 ; Retorna NIL caso contrario.
 
 (defun psr-completo-p (psr)
-	(let ((maxsz (list-length (PSR-listvars psr)))
-	       (auxLi NIL)
-	       (resultado 0) )
-	     
-		(setq auxLi (listOfPairsBuild (PSR-listvars psr) (PSR-listvalues psr)))
-		
-		(dotimes (i maxsz (PSR-listvars psr))
-					(if (not (equal (cdr (nth i auxLi)) NIL) )
-						(incf resultado)
-				)
+	(let
+		(
+			(maxsz (list-length (PSR-listvalues psr))) (nilelems 0)
 		)
-		(cond
-		     ((equal (list-length auxLi) resultado ) T)
-		       (T NIL)
+		(dotimes (i maxsz)
+			(if (equal (nth i (PSR-listvalues psr)) NIL) 
+				(incf nilelems)
+			)
+		)
+		(and
+			(=
+				(length (PSR-listvars psr))
+				(length (PSR-listvalues psr))
+			)
+			(= 0 nilelems)
 		)
 	)
 )
@@ -402,23 +405,27 @@
 ;    necessarios para determinar a consistencia.
 
 (defun psr-consistente-p (psr)
-
-	(block alpha
-    (let ((maxsz (list-length (PSR-listconstrains psr)))
-	    		(cont 0)
-	    		(ans T)
-      		(flag T))
-   			(defvar fun)
-	    	(dotimes (i maxsz )
-			    (incf cont)
-				    (setq fun (restricao-pred (nth i (PSR-listconstrains psr))) )
-				    (setf ans (funcall fun psr))
-				    (if (equal ans NIL)
-							(return-from alpha (values-list (list NIL cont)))
-					  )
+	(if (null (PSR-listconstrains psr)) (values T 0)
+		(let
+			(
+				(tests 0)
+				(result T)
+			)
+			(dolist (i (PSR-listconstrains psr)) 
+				(if (null (funcall (restricao-funcao-validacao i) psr)) 
+					(progn
+						(setf result nil)
+						(return)
+					)
 				)
-				(return-from alpha (values-list (list flag cont)))
-    )
+				(incf tests)
+			)
+			(if result
+				()
+				(incf tests)
+			)
+			(values result tests)
+		)
 	)
 )
 
@@ -434,57 +441,24 @@
 ;    determinar a consistencia.
 
 (defun psr-variavel-consistente-p (psr var)
-    (block alpha
-    (let ((maxsz (list-length (psr-variavel-restricoes psr var)))
-	    (cont 0)
-	    (ans T)
-	      (flag T))
-	     (defvar fun)
-	    (dotimes (i maxsz )
-		    (incf cont)
-			    (setq fun (restricao-pred (nth i (psr-variavel-restricoes psr var))) )
-			    
-			    
-			    (setf ans (funcall fun psr))
-			    (if (equal ans NIL)
-						(return-from alpha (values-list (list NIL cont)))
-					
-					
-			    
-				    )
-			    )
-	 (return-from alpha (values-list (list flag cont)))		
-    )
-    )
-)
-
-(defun psr-variavel-consistente-pVALOR (psr var)
-    (block alpha
-    (let ((maxsz (list-length (psr-variavel-restricoes psr var)))
-	    (cont 0)
-	    (ans T)
-	      )
-	     (defvar fun)
-	    (dotimes (i maxsz )
-		    (incf cont)
-			    (setq fun (restricao-pred (nth i (psr-variavel-restricoes psr var))) )
-			    
-			    
-			    (setf ans (funcall fun psr))
-			    (if (equal ans NIL)
-						(return-from alpha cont)
-					
-					
-			    
-				    )
-		    
-			    
-	    )
-	 (return-from alpha cont)		
-    )
-   
-    )
-
+	(let
+		(
+			(psr1 (cria-psr
+							(PSR-listvars psr)
+							(PSR-listdomains psr)
+							(copy-list
+								(psr-variavel-restricoes psr var)
+							)
+						)
+			)
+		(sz (list-length (PSR-listvalues psr))))
+		
+		(dotimes (i sz)
+			(setf (nth i (PSR-listvalues psr1) ) (nth i (PSR-listvalues psr) ) )
+		)
+		
+		(psr-consistente-p psr1)
+	)
 )
 
 
@@ -492,66 +466,46 @@
 
 ; PSR ATRIBUICAO CONSISTENTE
 
-; Este teste recebe um PSR, uma variável e um valor,
+; Este teste recebe um PSR, uma variavel e um valor,
 ; e retorna 2 valores.
 
-(defun psr-atribuicao-consistente-p (psr var val)
-	(let (
-		 (flag T)
-		 (oldval (psr-variavel-valor psr var))
-	(psr-adiciona-atribuicao! psr var val)	
-	(if (equal (psr-variavel-consistente-p psr var) NIL)
-			(setf flag NIL)
+(defun psr-atribuicao-consistente-p (psr var valor)
+	(let
+		(
+			(psr1 (cria-psr
+							(PSR-listvars psr)
+							(PSR-listdomains psr)
+							(copy-list (psr-variavel-restricoes psr var))
+						)
+			)
+			(result nil)
+			(sz (list-length (PSR-listvalues psr)))
+		)
+		
+		(dotimes (i sz)
+			(setf
+				(nth i (PSR-listvalues psr1))
+				(nth i (PSR-listvalues psr))
+			)
+		)
+		
+		(psr-adiciona-atribuicao! psr1 var valor)
+		
+		(setf
+			result
+			(multiple-value-list
+				(psr-variavel-consistente-p psr1 var)
+			)
+		)
+		
+		(values
+			(car result)
+			(car (cdr result))
+		)
 	)
-		(psr-adiciona-atribuicao! psr var oldval)	
-	(values flag (psr-variavel-consistente-pVALOR psr var))
-))
+)
 
-(defun psr-consistente-pAuxiliar (psr auxList)
 
-	(block alpha
-    (let ((maxsz (list-length auxList))
-	    (cont 0)
-	    (ans T)
-	      (flag T))
-	     (defvar fun)
-	    (dotimes (i maxsz )
-		    (incf cont)
-			    (setq fun (restricao-pred (nth i auxList)) )
-			    (setf ans (funcall fun psr))
-			    
-			   
-			    
-			    (if (equal ans NIL)
-						(return-from alpha (values-list (list NIL)))
-					
-					
-			    
-				    )	    
-	    )
-	   (return-from alpha (values-list (list flag)))
-			
-    )
-))
-
-(defun psr-consistente-pAuxiliarValues (psr auxList)
-
-	(block alpha
-    (let ((maxsz (list-length auxList))
-	    (cont 0)
-	    (ans T))
-	     (defvar fun)
-	    (dotimes (i maxsz )
-		    (incf cont)
-			    (setq fun (restricao-pred (nth i auxList)) )			    
-			    (setf ans (funcall fun psr))
-			    (if (equal ans NIL)
-						(return-from alpha (values-list (list cont)))			    
-				    )			    
-	    )    
-	   (return-from alpha (values-list (list cont)))
-    )
-))
 
 
 ; PSR ATRIBUICOES CONSISTENTES EM ARCO
@@ -561,33 +515,49 @@
 ; valor para essa variavel, e retorna 2 valores.
 
 (defun psr-atribuicoes-consistentes-arco-p (psr var1 val1 var2 val2)
-    (let (
-	     (oldval1 (psr-variavel-valor psr var1)) 
-	     (oldval2 (psr-variavel-valor psr var2))
-	     (ansDebug NIL)
-	     (novopsr NIL)
+	(let
+		(
+			(psr1 (cria-psr
+							(PSR-listvars psr)
+							(PSR-listdomains psr)
+							(intersection
+								(psr-variavel-restricoes psr var1)
+								(psr-variavel-restricoes psr var2)
+							)
+						)
+			)
+			(oldval1 (psr-variavel-valor psr var1))
+			(sz (list-length (PSR-listvalues psr)))
+			(oldval2 (psr-variavel-valor psr var2))
+			(result NIL)
 		)
-	
-		(setf novopsr
-					(cria-psr (PSR-listvars psr)
-										(PSR-listdomains psr)
-										(PSR-listconstrains psr)
-					)
+		(dotimes (i sz)
+			(setf
+				(nth i (PSR-listvalues psr1))
+				(nth i (PSR-listvalues psr))
+			)
 		)
-		(psr-adiciona-atribuicao! psr var1 val1)
-		(psr-adiciona-atribuicao! psr var2 val2)
-		(psr-adiciona-atribuicao! novopsr var1 val1)
-		(psr-adiciona-atribuicao! novopsr var2 val2)	
-		(setq ansDebug
-					(intersection (psr-variavel-restricoes psr var1)
-			    							(psr-variavel-restricoes psr var2)
-			    )
+
+		(psr-adiciona-atribuicao! psr1 var1 val1)
+		(psr-adiciona-atribuicao! psr1 var2 val2)
+		
+		(setf
+			result
+			(multiple-value-list
+				(psr-consistente-p psr1)
+			)
 		)
-		(psr-adiciona-atribuicao! psr var1 oldval1) 
-		(psr-adiciona-atribuicao! psr var2 oldval2)
+		
+		(if oldval1 (psr-adiciona-atribuicao! psr var1 oldval1)
+			(psr-remove-atribuicao! psr var1)
+		)
+		(if oldval2 (psr-adiciona-atribuicao! psr var2 oldval2)
+			(psr-remove-atribuicao! psr var2)
+		)
+		
 		(values
-			(psr-consistente-pAuxiliar novopsr ansDebug)
-			(psr-consistente-pAuxiliarValues novopsr ansDebug)
+			(car result)
+			(car (cdr result))
 		)
 	)
 )
@@ -607,7 +577,7 @@
 ; esse puzzle particular.
 ;
 ; 1) Nesta funcao verifica-se e coloca-se todos os vizinhos de uma variavel numa
-; lista de vizinhos;
+;    lista de vizinhos;
 ; 
 ; 2) Cria um predicado que recebe um Array e os respectivos indices do mesmo, para
 ;    calculo do tamanho dele proprio;
@@ -626,9 +596,11 @@
 ; lista de dominios e lista de restricoes.
 
 (defun GetNeighboursOfArrayCell (arr i j)
-	(let ((listaVizinhos NIL))
-
-(cond ((and (= i 0) (= j 0))
+	(let
+		(
+			(listaVizinhos NIL)
+		)
+		(cond ((and (= i 0) (= j 0))
 				(setf listaVizinhos (append listaVizinhos (list (gethash (cons i j) hashtable2))))
 				(setf listaVizinhos (append listaVizinhos (list (gethash (cons i (+ j 1)) hashtable2))))
 				(setf listaVizinhos (append listaVizinhos (list (gethash (cons (+ i 1) j) hashtable2))))
@@ -685,95 +657,110 @@
 			(setf listaVizinhos (append listaVizinhos (list (gethash (cons i (+ j 1)) hashtable2))))
 			(setf listaVizinhos (append listaVizinhos (list (gethash (cons (+ i 1) (- j 1)) hashtable2))))
 			(setf listaVizinhos (append listaVizinhos (list (gethash (cons (+ i 1) j) hashtable2))))
-			(setf listaVizinhos (append listaVizinhos (list (gethash (cons (+ i 1) (+ j 1)) hashtable2)))))
+			(setf listaVizinhos (append listaVizinhos (list (gethash (cons (+ i 1) (+ j 1)) hashtable2))))
+		)
 		)
 		listaVizinhos	
 	)
 )
 
 
-
 (defun CriaPredicado (arr i j)
-
-	(let(
-		(listaviz (GetNeighboursOfArrayCell arr i j))
-	       (valor (aref arr i j)) )  
-
-	(setq fun #'(lambda (psr)
-	(let ( 
-	
-	       (nones 0)
-	       (nzeros 0)
-	       (soma 0)
-	       (sumaux 0 ) )
-	       
-	     (dotimes (i (list-length listaviz) )
-				
-			
-	     
-				(if (equal (psr-variavel-valor psr (nth i listaviz)) 1) 
-					(incf nones)
+	(let
+		(
+			(listaviz (GetNeighboursOfArrayCell arr i j))
+	    (valor (aref arr i j))
+	    func
+	  )
+	  (setq
+	  	func
+	  	#'(lambda (psr)
+					(let
+						(
+							(nones 0) 
+				      (nnils 0)
+				    ) 
+				    (dotimes (i (list-length listaviz)) 
+							(if (equal (psr-variavel-valor psr (nth i listaviz)) 1) 
+								(incf nones)
+							)
+							(if (equal (psr-variavel-valor psr (nth i listaviz)) NIL) 
+								(incf nnils)
+							)
+				    )
+				    (if (and (<= valor (+ nones nnils)) (<= nones valor)) 
+							T
+						)
+					)
 				)
-				
-				(if (equal (psr-variavel-valor psr (nth i listaviz)) 0) 
-					(incf nzeros)
-				)
-	     )
-	    
-	
-	     
-	     (dotimes (i (list-length listaviz) )
-			(if (not (equal NIL (psr-variavel-valor psr (nth i listaviz) )) )
-				(setf soma (+ soma (psr-variavel-valor psr (nth i listaviz) )))
-		    )
-	     )
-	 (setf sumaux nones)
-	 (if (and (<= sumaux valor) ( >= (- (list-length listaviz) valor) nzeros))
-	 				T
-	 			)
-	 )
-	))  
-	 
-	fun
-))
+	  )
+		func 
+	)
+)
+
 
 (defun fill-a-pix->psr (arr)
-	(let (
-		(cont 0)
-	   (lines (array-dimension arr 0))
-	   (columns (array-dimension arr 1))
-	   (listadevars NIL)
-	   (listadedoms NIL)
-	   (listaderestr NIL)
-		 )
-		 (defparameter aux (make-array (list lines columns )))
-		 (dotimes (i lines)
-			(dotimes (j columns)
-				(setf (aref aux i j) (aref arr i j))
-				(setf (gethash (cons i j) hashtable2) (write-to-string cont))
-				(setf listadevars (append listadevars (list (write-to-string cont))))
+	(let
+		(
+			(cont 0)
+	   	(lines (array-dimension arr 0))
+	   	(columns (array-dimension arr 1))
+	   	(listadevars NIL)
+	   	(listadedoms NIL)
+	   	(listaderestr NIL)
+		)
+		(defparameter aux (make-array (list lines columns )))
+
+		; Coloca o array aux apenas a -1
+		(dotimes (i lines)
+			(dotimes (j columns)	
+				(setf
+					(aref aux i j)
+					(aref arr i j)
+				)
+				(setf
+					(gethash
+						(cons i j)
+						hashtable2
+					)
+					(write-to-string cont)
+				)
+				(setf
+					listadevars
+					(append
+						listadevars
+						(list (write-to-string cont))
+					)
+				)
 				(incf cont)
 			)
 		)
+
 		(dotimes (i lines)
-			(dotimes (j columns)
-				(if (not (equal NIL (aref arr i j) ))
-					(setf listaderestr
+			(dotimes (j columns)		
+				(if (not (equal NIL (aref arr i j)))
+					(setf
+						listaderestr
 						(append
 							listaderestr
 							(list
-								(cria-restricao (GetNeighboursOfArrayCell arr i j)
-																(CriaPredicado aux i j)
+								(cria-restricao
+									(GetNeighboursOfArrayCell arr i j)
+									(CriaPredicado arr i j)
 								)
 							)
 						)
 					)
-				)	
+				)
 			)
-		)	
-		(setf listadedoms (make-list cont :initial-element '(0 1)))
-		(cria-psr listadevars listadedoms listaderestr)
+		)		
+	
+		(setf
+			listadedoms
+			(make-list cont :initial-element '(0 1))
 		)
+		(cria-psr listadevars listadedoms listaderestr)
+	)
 )
 
 
@@ -781,19 +768,28 @@
 
 ; Recebe um PSR resolvido, um inteiro que representa o numero de linhas l,
 ; e outro que representa o numero de colunas c, e devolve um array bidimensional
-; de l linhas e c colunas, contendo para cada posicao linha/coluna a atribuição
+; de l linhas e c colunas, contendo para cada posicao linha/coluna a atribuicao
 ; da variavel correspondente do PSR.
 ; Nesta implementacao apenas foi necessario criar o nome da variavel,
 ; sendo este o indice do valor da variavel do nosso PSR em string.
 
 (defun psr->fill-a-pix (psr lin col)
-	(defparameter aux (make-array (list lin col )))
-	(dotimes (i lin)
+	(let
+		(
+			(aux (make-array (list lin col )))
+		  (tvars 0)
+		)
+		(dotimes (i lin)
 			(dotimes (j col)
-				(setf (aref aux i j) (psr-variavel-valor psr (write-to-string i)) )
+				(setf
+					(aref aux i j)
+					(psr-variavel-valor psr (write-to-string tvars))
+				)
+				(incf tvars) 
 			)
+		)
+		aux
 	)
-	aux
 )
 
 
@@ -811,39 +807,63 @@
 ; e sem qualquer mecanismo de inferencia.
 ; Retorna 2 valores, o primeiro e o PSR resolvido, ou NIL caso nao exista solucao.
 
-(defvar final 0)
-
 (defun procura-retrocesso-simples (psr)
-	(let (
-			(var (car (psr-variaveis-nao-atribuidas psr)))
+	(let
+		(
+			var 
 			(resultado T)
 			(consistency_checks 0)
 			(isvalid NIL)
+		)
+		(if (psr-completo-p psr)
+			(return-from
+				procura-retrocesso-simples (values psr consistency_checks)
 			)
-			(dolist (val (psr-variavel-dominio psr var))
-				(if (equal (psr-completo-p psr) NIL)
-					(progn
-						(multiple-value-bind (resultado test)
-							(psr-atribuicao-consistente-p psr var val) 
-							(setf isvalid resultado)
-							(setf consistency_checks
-								(+ consistency_checks test)))
-							(if isvalid
-							(progn
-								(psr-adiciona-atribuicao! psr var val)
-								(multiple-value-bind (ret testes-feitos)
-									(procura-retrocesso-simples psr) 
-									(setf resultado ret)
-									(setf consistency_checks
-										(+ consistency_checks testes-feitos)))
-								(if (eq nil resultado)
-									(progn
-										(psr-remove-atribuicao! psr var))
-									))))))
-			(if resultado
-				(values psr consistency_checks)
-				(values nil consistency_checks)
+		)
+		(setf
+			var
+			(first
+				(psr-variaveis-nao-atribuidas psr)
 			)
+		)
+		(dolist (val (psr-variavel-dominio psr var))
+			(multiple-value-bind
+				(resultado test)
+				(psr-atribuicao-consistente-p psr var val) 
+				(setf
+					isvalid
+					resultado
+				)
+				(setf
+					consistency_checks
+					(+ consistency_checks test)
+				)
+			)
+			(if isvalid
+				(progn
+					(psr-adiciona-atribuicao! psr var val)
+					(multiple-value-bind
+						(ret testes-feitos)
+						(procura-retrocesso-simples psr)
+						(setf
+							resultado
+							ret
+						)
+						(setf
+							consistency_checks
+							(+ consistency_checks testes-feitos)
+						)
+					)
+					(if resultado
+						(return-from
+							procura-retrocesso-simples (values psr consistency_checks)
+						)
+					)
+					(psr-remove-atribuicao! psr var)
+				)
+			)
+		)
+		(values NIL consistency_checks)
 	)
 )
 
@@ -856,10 +876,201 @@
 ; Se nao houver solucao, deve ser retornado NIL.
 
 (defun resolve-simples (arr) 
-	(psr->fill-a-pix (procura-retrocesso-simples
-											(fill-a-pix->psr arr)
-										)
-										(array-dimension arr 0)
-										(array-dimension arr 1)
+	(psr->fill-a-pix
+		(procura-retrocesso-simples
+			(fill-a-pix->psr arr)
+		)
+		(array-dimension arr 0)
+		(array-dimension arr 1)
 	)
 )
+
+
+
+
+; ======================================================================================= ;
+; ======================================================================================= ;
+;                                                                                         ;
+;                                  PROJECT | SECOND PART                                  ;
+;                                                                                         ;
+; ======================================================================================= ;
+; ======================================================================================= ;
+
+
+
+
+; ======================================================================================= ;
+;                                PROCURAS MAIS AVANCADAS                                  ;
+; ======================================================================================= ;
+
+
+; COUNT NON ATTRIBUTED VARIABLES IN CONSTRAINS
+
+; This auxiliar function counts the number of variables that does not contain
+; associated constrains.
+
+(defun Count-Non-Attributed-Variables-In-Constraint (psr lst)
+	(let
+		(
+			(counter 0)
+			(sz (list-length lst))
+		)
+		(dotimes (i sz) 
+			(if (equal NIL (psr-variavel-valor psr (nth i lst)) ) 
+				(incf counter)
+			) 
+		)
+		counter	
+	)
+)
+
+
+; RE-COMPUTE DEGREE OF
+
+; The objective of this funtion is to count the number of Total Degrees
+; and see if we have at leat one Constrain attributed.
+
+(defun ReComputeDegreeOf (psr var)
+	(let
+		(
+			(lista1 (psr-variavel-restricoes psr var))
+	    (totalDegree 0)
+		)
+
+		; nth k lista1 is a constraint
+		
+		(dotimes (k (list-length lista1))
+			(progn
+				(if (>
+							(Count-Non-Attributed-Variables-In-Constraint
+								psr
+								(restricao-variaveis (nth k lista1))
+							)
+							1
+						)
+					(incf totalDegree)
+				)
+			)		 
+		)
+		totalDegree
+	)	
+)
+
+
+; GRAU VARS NAO ATRIBUIDAS
+
+; Calculate the Degree of non attributed variables.
+
+(defun grauvarsnaoatrib (psr)
+	(let ( 
+			(lista (psr-variaveis-nao-atribuidas psr) )
+			(sz (list-length (psr-variaveis-nao-atribuidas psr) ) )
+			(myhashtable3 (make-hash-table :test 'equal))
+			(lst1 NIL)
+			(lst2 NIL)
+			(finallst NIL)
+		)
+		
+		(dotimes (i sz)
+			(setf (gethash (nth i lista) myhashtable3)
+				  (list-length (psr-variavel-restricoes psr (nth i lista)))
+			)
+		)
+		
+		(dotimes (i sz)
+			 (setf lst1 (append lst1 (list (nth i lista))))
+			 (setf lst2 (append lst2 (list (gethash (nth i lista) myhashtable3))))
+		)
+		
+		(setq finallst (listOfPairsBuild lst1 lst2) )
+		(stable-sort finallst #'> :key #'cdr)
+	finallst	
+	)
+)
+
+
+; RE-CALCULATE GLOBAL DEGREES
+
+; It re-calculate the global degrees and sort it.
+
+(defun ReCalculateGlobalDegrees (psr lst2) 
+	(let ( (sz (list-length lst2) )
+			)
+	(dotimes (i sz)
+		(setf
+			(cdr (nth i lst2))
+			(ReComputeDegreeOf psr (car (nth i lst2)))
+		)
+	)
+	(stable-sort lst2 #'> :key #'cdr)
+	lst2
+	)
+)
+
+
+; PROCURA RETROCESSO GRAU
+
+; The idea of this function is to backtrack search using Maximum Degree Heuristic
+; implemented with support of auxiliar function:
+; 
+; ReCalculateGlobalDegrees: re-calculate the global degrees of the pair list;
+
+(defun procura-retrocesso-grau (psr)
+	(let
+		(
+			var 
+			(resultado T)
+			(consistency_checks 0)
+			(isvalid NIL)
+			(pairslst (grauvarsnaoatrib psr)) 
+		)
+			
+		(ReCalculateGlobalDegrees psr pairslst)
+		
+		(if (psr-completo-p psr)
+			(return-from procura-retrocesso-grau (values psr consistency_checks))
+		)
+		
+		(setf
+			var
+			(car (first pairslst))
+		)
+		
+		(dolist (val (psr-variavel-dominio psr var))
+			(multiple-value-bind
+				(resultado test)
+				(psr-atribuicao-consistente-p psr var val) 
+				(setf
+					isvalid
+					resultado
+				)
+				(setf
+					consistency_checks
+					(+ consistency_checks test)
+				)
+			)
+			(if isvalid
+				(progn
+					(psr-adiciona-atribuicao! psr var val)
+					(multiple-value-bind
+						(ret testes-feitos)
+						(procura-retrocesso-grau psr)
+						(setf
+							resultado
+							ret
+						)
+						(setf
+							consistency_checks
+							(+ consistency_checks testes-feitos))
+						)
+					(if resultado
+						(return-from procura-retrocesso-grau (values psr consistency_checks))
+					)
+					(psr-remove-atribuicao! psr var)
+					(ReCalculateGlobalDegrees psr pairslst)
+				)
+			)
+		)
+		(values NIL consistency_checks)
+	)
+) 
