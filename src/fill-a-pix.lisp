@@ -443,21 +443,30 @@
 (defun psr-variavel-consistente-p (psr var)
 	(let
 		(
-			(psr1 (cria-psr
-							(PSR-listvars psr)
-							(PSR-listdomains psr)
-							(copy-list
-								(psr-variavel-restricoes psr var)
-							)
-						)
+			(count 0)
+			(restr (psr-variavel-restricoes psr var))
+		)			
+		(cond
+			(
+				(null restr) 
+				(return-from psr-variavel-consistente-p (values T 0))
 			)
-		(sz (list-length (PSR-listvalues psr))))
-		
-		(dotimes (i sz)
-			(setf (nth i (PSR-listvalues psr1) ) (nth i (PSR-listvalues psr) ) )
 		)
-		
-		(psr-consistente-p psr1)
+		(dolist (ele restr)
+			(incf count)
+			(when
+				(not
+					(funcall
+						(restricao-funcao-validacao ele)
+						psr
+					)
+				)	
+				(return-from
+					psr-variavel-consistente-p (values nil count)
+				)
+			)
+		)
+	(values T count)
 	)
 )
 
@@ -469,38 +478,40 @@
 ; This test receives an RSP, a variable and a value,
 ; and returns 2 values.
 
-(defun psr-atribuicao-consistente-p (psr var valor)
+(defun psr-atribuicao-consistente-p(psr var valor)
+	(if (equal (psr-listconstrains psr) nil)
+		(return-from
+			psr-atribuicao-consistente-p
+				(values T 0)
+		)
+	)
+	
 	(let
 		(
-			(psr1 (cria-psr
-							(PSR-listvars psr)
-							(PSR-listdomains psr)
-							(copy-list (psr-variavel-restricoes psr var))
-						)
-			)
-			(result nil)
-			(sz (list-length (PSR-listvalues psr)))
+			(res nil)
+			(aux (psr-variavel-valor psr var))
 		)
-		
-		(dotimes (i sz)
-			(setf
-				(nth i (PSR-listvalues psr1))
-				(nth i (PSR-listvalues psr))
+		(cond
+			(
+				(equal aux nil) 
+				(setf aux nil)
 			)
 		)
 		
-		(psr-adiciona-atribuicao! psr1 var valor)
+		(psr-adiciona-atribuicao! psr var valor)
 		
 		(setf
-			result
+			res
 			(multiple-value-list
-				(psr-variavel-consistente-p psr1 var)
+				(psr-variavel-consistente-p psr var)
 			)
 		)
 		
-		(values
-			(car result)
-			(car (cdr result))
+		(psr-adiciona-atribuicao! psr var aux)
+		
+		(return-from
+			psr-atribuicao-consistente-p
+				(values (nth 0 res) (nth 1 res))
 		)
 	)
 )
@@ -514,51 +525,54 @@
 ; and a value for this variable, a variable v2 and a
 ; value for that variable, and returns two values.
 
-(defun psr-atribuicoes-consistentes-arco-p (psr var1 val1 var2 val2)
+(defun psr-atribuicoes-consistentes-arco-p (psr var1 v1 var2 v2)
+	(if (equal (psr-listconstrains psr) nil)
+		(return-from
+			psr-atribuicoes-consistentes-arco-p
+				(values T 0)
+		)
+	)
+
 	(let
 		(
-			(psr1 (cria-psr
-							(PSR-listvars psr)
-							(PSR-listdomains psr)
-							(intersection
-								(psr-variavel-restricoes psr var1)
-								(psr-variavel-restricoes psr var2)
-							)
-						)
-			)
-			(oldval1 (psr-variavel-valor psr var1))
-			(sz (list-length (PSR-listvalues psr)))
-			(oldval2 (psr-variavel-valor psr var2))
-			(result NIL)
+			(testes 0)
+			(aux1 (psr-variavel-valor psr var1))
+			(aux2 (psr-variavel-valor psr var2))
 		)
-		(dotimes (i sz)
-			(setf
-				(nth i (PSR-listvalues psr1))
-				(nth i (PSR-listvalues psr))
-			)
+		
+		(if (equal aux1 nil)
+			(setf aux1 nil)
+		)
+		
+		(if (equal aux2 nil)
+			(setf aux2 nil)
 		)
 
-		(psr-adiciona-atribuicao! psr1 var1 val1)
-		(psr-adiciona-atribuicao! psr1 var2 val2)
+		(psr-adiciona-atribuicao! psr var1 v1)
+		(psr-adiciona-atribuicao! psr var2 v2)
 		
-		(setf
-			result
-			(multiple-value-list
-				(psr-consistente-p psr1)
+		(dolist (r (psr-variavel-restricoes psr var1))
+			(cond
+				(
+					(membro var2 (restricao-variaveis r))
+					(incf testes)
+					(cond
+						(
+							(not (funcall (restricao-funcao-validacao r) psr))
+							(psr-adiciona-atribuicao! psr var1 aux1)
+							(psr-adiciona-atribuicao! psr var2 aux2)
+							(return-from
+								psr-atribuicoes-consistentes-arco-p
+									(values nil testes)
+							)
+						)
+				  )
+				)
 			)
 		)
-		
-		(if oldval1 (psr-adiciona-atribuicao! psr var1 oldval1)
-			(psr-remove-atribuicao! psr var1)
-		)
-		(if oldval2 (psr-adiciona-atribuicao! psr var2 oldval2)
-			(psr-remove-atribuicao! psr var2)
-		)
-		
-		(values
-			(car result)
-			(car (cdr result))
-		)
+		(psr-adiciona-atribuicao! psr var1 aux1)
+		(psr-adiciona-atribuicao! psr var2 aux2)
+		(values T testes)
 	)
 )
 
@@ -1382,7 +1396,7 @@
 ; Search for regression solving the CSP used by MAC (Maintain Arc Consistency)
 ; function and applying MRV heuristic model.
 
-(defun procura-retrocesso-mac-mrv(psr)
+(defun procura-retrocesso-mac-mrv (psr)
 	(let ((testesTotais 0) (res nil) (res1 nil) (var nil) (inf nil))
 		(cond ((psr-completo-p psr) 
 			(return-from procura-retrocesso-mac-mrv (values psr testesTotais))))
