@@ -24,7 +24,7 @@
 ;                                             LOAD                                        ;
 ; ======================================================================================= ;
 
-; Invocacao dos ficheiros de teste.
+; Invocation of test files.
 
 ;;;; =====> UNCOMMENT AS YOU NEED <===== ;;;;
 
@@ -49,8 +49,8 @@
 
 ; HASHTABLE GLOBAL
 
-; As variaveis do nosso PSR irao servir para indexar a Hashtable
-; e desta forma acedemos aos respectivos valores com um custo menor.
+; The variables of our PSR will serve to index the Hashtable
+; and this way we can access the respective values at a lower cost.
 
 (defparameter myhashtable (make-hash-table :test 'equal))
 (defparameter hashtable2 (make-hash-table :test 'equal))
@@ -73,9 +73,9 @@
 ;                                        TIPO RESTRICAO                                   ;
 ; ======================================================================================= ;
 
-; O tipo Restricao tem como argumentos uma lista de variaveis e um predicado que avalia
-; se uma dada CSP e valida ou nao.
-; O predicado ira ter que chamar a funcao check-CSP para que assim construa a restricao.
+; The restriction type has as arguments a list of variables and a predicate that evaluates
+; whether a CSP is valid or not.
+; The predicate will have to call the function check-CSP so that build the constraint.
 
 
 (defun cria-restricao (lstvars predi)
@@ -115,25 +115,25 @@
 ;                                              PSR                                        ;
 ; ======================================================================================= ;
 
-; O tipo Problema de Satisfacao de Restricoes (PSR) e utilizado para representar
-; um problema de satisfacao de restricoes, que guarda informacao acerca das variaveis,
-; dominios e restricoes de um Problema de Satisfacao de Restricoes (PSR).
+; The Satisfaction Problem type Constrained (PSR) and used to represent
+; one problem satisfaction of restrictions, which stores information about the variables,
+; domains and restrictions of a Satisfaction Problem of Constrained (PSR).
 
 
 ; LISTAS A USAR
 
-; listvars - lista de variaveis;
-; listdomains - lista de dominios;
-; listconstrains - lista de restricoes;
-; listvalues - lista de atribuicoes.
+; listvars       - Variables list;
+; listdomains    - Domains list;
+; listconstrains - Constrains list;
+; listvalues     - Assignment List.
 
 
 ; CRIA PSR
 
-; Este construtor recebe um lista de variaeis, uma lista de dominios
-; com o mesmo tamanho da lista de variaveis, e uma lista de restricoes.
-; Associa variaveis e dominios numa Hashtable onde facilmente se constroi
-; as estruturas e retornamos NIL.
+; This constructor receives a variaeis list, a list of domains
+; with the same size of the variable list, and a list of restrictions.
+; Associated variables and fields in a Hashtable which easily builds
+; structures and return NIL.
 
 (defun cria-psr (varsl domainsl constrainsl)
 	(let ((maxsz (list-length varsl)) 
@@ -161,9 +161,9 @@
 
 ; ATRIBUICOES DO PSR
 
-; Recebe um PSR, e retorna uma lista com todas as atribuicoes do PSR.
-; Nesta funcao utilizamos uma funcao aux para verificar se construimos
-; uma lista de pares.
+; Receives a PSR, and returns a list of all the PSR assignments.
+; In this function we use a function aux to see if we build
+; a list of pairs.
 
 (defun listOfPairsBuild (lst1 lst2)
   (loop for idx from 0
@@ -202,8 +202,8 @@
 
 ; VARIAVEIS PSR
 
-; Recebe um PSR e retorna uma lista com todas as variaveis do PSR, 
-; independentemente de estarem ou nao atribuidas.
+; Receives a PSR and returns a list of all the PSR variables,
+; whether or not assigned.
 
 (defun psr-variaveis-todas (psr)
 	(PSR-listvars psr)
@@ -212,8 +212,8 @@
 
 ; VARIAVEIS NAO ATRIBUIDAS
 
-; Recebe um PSR e retorna uma lista com as variaveis do PSR que
-; ainda nao foram atribuidas.
+; Receives a PSR and returns a list of the variables that PSR
+; still have not been assigned.
 
 (defun psr-variaveis-nao-atribuidas (psr)
 	(let ((maxsz (list-length (PSR-listvars psr)))
@@ -230,9 +230,9 @@
 
 ; VALOR DA VARIAVEL
 
-; Selector recebe um PSR e uma variavel.
-; Se a variavel tiver um valor atribuido, e retornado o valor correspondente.
-; Se a variavel nao estiver atribuida, e retornado NIL.
+; Selector receives a PSR and a variable.
+; If the variable have an assigned value, and return the corresponding value.
+; If the variable is not assigned, and returned NIL.
 
 (defun psr-variavel-valor (psr var)
 (let ((maxsz (list-length (PSR-listvars psr)))
@@ -252,7 +252,7 @@
 
 ; DOMINIO DA VARIAVEL
 
-; Retorna o dominio correspondente a essa variavel.
+; Returns the corresponding domain to that variable.
 
 (defun psr-variavel-dominio (psr key)
     (defparameter *myhashtable* (make-hash-table :test 'equal))
@@ -271,7 +271,7 @@
 
 ; RESTRICOES DA VARIAVEL
 
-; Retorna uma lista com todas as restricoes aplicaveis a essa variavel.
+; Returns a list of all restrictions applicable to this variable.
 
 (defun psr-variavel-restricoes (psr key)
     (defparameter *myhashtable* (make-hash-table :test 'equal))
@@ -303,10 +303,10 @@
 
 ; ADICIONA ATRIBUICAO
 
-; Este modificador recebe um PSR, uma variavel e um valor,
-; e altera o PSR recebido, atribuindo o valor a variavel.
-; Se a variavel ja tinha sido atribuida, o novo valor substitui o valor anterior.
-; O valor de retorno desta funcao nao esta definido.
+; This modifier receives an RSP, a variable and a value,
+; and changes the PSR received, assigning the value to variable.
+; If the variable already had been assigned, the new value replaces the previous value.
+; The return value of this function is not defined.
 
 
 (defun psr-adiciona-atribuicao! (psr var val)
@@ -324,11 +324,11 @@
 
 ; REMOVE ATRIBUICAO
 
-; Este modificador recebe um PSR e uma variavel,
-; e altera o PSR recebido, removendo qualquer 
-; atribuicao a variavel que tenha sido feita anteriormente.
-; A variavel passa efetivamente a nao estar atribuida.
-; O valor de retorno desta funcao nao esta definido.
+; This modifier receives a PSR and a variable,
+; and changes the PSR received, removing any
+; attribution the variable that has been done previously.
+; The variable effectively becomes not be assigned.
+; The return value of this function is not defined.
 
 
 (defun psr-remove-atribuicao! (psr var) 
@@ -350,11 +350,11 @@
 
 ; ALTERA DOMINIO
 
-; Este modificador recebe um PSR, uma variavel,
-; e um dominio e altera o PSR recebido,
-; alterando o dominio associado a variavel recebida,
-; para que passe a ser o dominio recebido.
-; O valor de retorno desta funcao nao esta definido.
+; This modifier receives an RSP, a variable,
+; and domain and changes the PSR received,
+; changing the domain associated with the received variable,
+; so that it will be the domain received.
+; The return value of this function is not defined.
 
 
 (defun psr-altera-dominio! (psr var dom)
@@ -370,9 +370,9 @@
 
 ; PSR COMPLETO
 
-; Recebe um PSR e retorna T se estiver completo,
-; i.e. se tiver uma atribuicao para todas as variaveis.
-; Retorna NIL caso contrario.
+; Receives a PSR and returns T if it's complete,
+; i.e. if you have an attribution for all variables.
+; Returns NIL otherwise.
 
 (defun psr-completo-p (psr)
 	(let
@@ -397,12 +397,12 @@
 
 ; PSR CONSISTENTE
 
-; 1) Valor logico que e T se o PSR for consistente,
-;    ou seja, se todas as restricoes do PSR se verificarem
-;    para as atribuicoes existentes, e NIL cc.
+; 1) The logic value that T and the PSR are consistent,
+;    that is, if all of the PSR restrictions are met
+;    to existing assignments, and NIL cc.
 
-; 2) Numero de testes de consistencia que foram
-;    necessarios para determinar a consistencia.
+; 2) Number of consistency tests needed to calculate
+;    the consistency.
 
 (defun psr-consistente-p (psr)
 	(if (null (PSR-listconstrains psr)) (values T 0)
@@ -433,12 +433,12 @@
 
 ; PSR VARIAVEL CONSISTENTE
 
-; 1) Valor logico que e T se a variavel e consistente
-;    tendo em conta as atribuicoes do PSR.
+; 1) logical value that and T if the variable is consistent
+;    taking into account the PSR assignments.
 
-; 2) Retornado corresponde ao numero de testes de
-;    consistencia que foram necessarios para
-;    determinar a consistencia.
+; 2) Return corresponds to the number of test
+;    consistency that were required to
+;    determining consistency.
 
 (defun psr-variavel-consistente-p (psr var)
 	(let
@@ -466,8 +466,8 @@
 
 ; PSR ATRIBUICAO CONSISTENTE
 
-; Este teste recebe um PSR, uma variavel e um valor,
-; e retorna 2 valores.
+; This test receives an RSP, a variable and a value,
+; and returns 2 values.
 
 (defun psr-atribuicao-consistente-p (psr var valor)
 	(let
@@ -510,9 +510,9 @@
 
 ; PSR ATRIBUICOES CONSISTENTES EM ARCO
 
-; Este teste recebe um PSR, uma variavel v1,
-; e um valor para essa variavel, uma variavel v2 e um 
-; valor para essa variavel, e retorna 2 valores.
+; This test receives a PSR, a variable v1,
+; and a value for this variable, a variable v2 and a
+; value for that variable, and returns two values.
 
 (defun psr-atribuicoes-consistentes-arco-p (psr var1 val1 var2 val2)
 	(let
@@ -572,28 +572,28 @@
 
 ; TRANSFORMA FILL-A-PIX EM PSR
 
-; Recebe um array correspondente a uma tabela bidimensional m x n de um puzzle
-; Fill-a-Pix por resolver e retorna um PSR que representa o problema de resolver
-; esse puzzle particular.
+; Receives a corresponding array to a two-dimensional table mxn of a puzzle
+; Fill-a-Pix unresolved and returns a PSR representing the problem to solve
+; this particular puzzle.
 ;
-; 1) Nesta funcao verifica-se e coloca-se todos os vizinhos de uma variavel numa
-;    lista de vizinhos;
-; 
-; 2) Cria um predicado que recebe um Array e os respectivos indices do mesmo, para
-;    calculo do tamanho dele proprio;
+; 1) This function is found and placed all the neighbors of a variable in a
+;    list of neighbors;
 ;
-; 3) Atribui o nome das variaveis igual aos indices e coloca numa lista de strings
-;    para ser avaliado como um nome;
+; 2) Create a predicate receiving an Array and their indices thereof to
+;    size of calculating his own;
 ;
-; 4) Coloca todas as restricoes verificadas numa lista de restricoes,
-;    em que cada restricao e aplicada segundo um dado predicado verificando
-;    todos os seus vizinhos em redor;
+; 3) Assign the name of the variables equal to the indices and puts a list of strings
+;    to be evaluated as a name;
 ;
-; 5) Atribui o dominio 0 ou 1 (branco ou preto) numa lista de dominios
-;    as variaveis correspondentes;
+; 4) Put all restrictions checked a list of restrictions,
+;    where each constraint and enforced by a given predicate checking
+;    all its neighbors around;
 ;
-; Por fim cria o PSR com os argumentos  das novas lista de variaveis,
-; lista de dominios e lista de restricoes.
+; 5) assign the domain 0 or 1 (white or black) in domains list
+;    the corresponding variables;
+;
+; Finally creates the PSR with the arguments of the new variables list,
+; domains list and restrictions list.
 
 (defun GetNeighboursOfArrayCell (arr i j)
 	(let
@@ -711,7 +711,7 @@
 		)
 		(defparameter aux (make-array (list lines columns )))
 
-		; Coloca o array aux apenas a -1
+		; Place the array aux just -1
 		(dotimes (i lines)
 			(dotimes (j columns)	
 				(setf
@@ -766,12 +766,12 @@
 
 ; TRANSFORMA PSR EM FILL-A-PIX
 
-; Recebe um PSR resolvido, um inteiro que representa o numero de linhas l,
-; e outro que representa o numero de colunas c, e devolve um array bidimensional
-; de l linhas e c colunas, contendo para cada posicao linha/coluna a atribuicao
-; da variavel correspondente do PSR.
-; Nesta implementacao apenas foi necessario criar o nome da variavel,
-; sendo este o indice do valor da variavel do nosso PSR em string.
+; The PSR receives a fixed, an integer representing the number of lines l,
+; and another that represents the number of columns c, and returns a two-dimensional array
+; l rows and c columns, containing for each position row/column in assigning
+; the corresponding PSR variable.
+; In this implementation was only necessary to create the name of the variable,
+; which is the variable value of the index of our PSR in string.
 
 (defun psr->fill-a-pix (psr lin col)
 	(let
@@ -802,10 +802,10 @@
 
 ; PROCURA RETROCESSO SIMPLES
 
-; Recebe um PSR, e tenta resolve-lo usando uma procura com retrocesso simples,
-; i.e. sem usar qualquer heuristica para escolher a proxima variavel e valor,
-; e sem qualquer mecanismo de inferencia.
-; Retorna 2 valores, o primeiro e o PSR resolvido, ou NIL caso nao exista solucao.
+; Receives a PSR, and try to solve it using a search with simple regression,
+; i.e. without using any heuristics to choose the next variable and value,
+; and no inference mechanism.
+; Returns two values, the first and the PSR resolved, or NIL if no solution exists.
 
 (defun procura-retrocesso-simples (psr)
 	(let
@@ -870,10 +870,10 @@
 
 ; RESOLVE SIMPLES
 
-; Recebe um array com um puzzle Fill-a-Pix por resolver, tenta resolve-lo usando a
-; procura-retrocesso-simples e retorna o resultado final como um array do problema
-; Fill-a-Pix resolvido.
-; Se nao houver solucao, deve ser retornado NIL.
+; Takes an array with a Fill-a-Pix puzzle to be solved, try to solve it using the
+; procura-retrocesso-simples function and returns the final result as an array
+; from the Fill-a-Pix problem solved.
+; If there is no solution, must be returned NIL.
 
 (defun resolve-simples (arr) 
 	(psr->fill-a-pix
@@ -1073,4 +1073,351 @@
 		)
 		(values NIL consistency_checks)
 	)
-) 
+)
+
+
+
+; INFERENCIA
+
+; Inference function is a list of inferences.
+
+(defstruct inferencia 
+	(lista nil)
+)
+
+
+; MINIMUM REMAINING VALUES
+
+; Search for smaller domains and selects the variable with the smallest domain.
+
+(defun min-remaining-values (psr)
+	(let
+		(
+			(varList (psr-variaveis-nao-atribuidas psr)) 
+			(select-var nil)
+			(minimum-domain-size nil)
+			(aux 0)
+		)
+		(setf select-var (first varList))
+		(setf minimum-domain-size (length (psr-variavel-dominio psr select-var)))
+		(setf varList (rest varList))
+		(dolist (i varList)
+			(setf aux (length (psr-variavel-dominio psr i)))
+			(cond ((< aux minimum-domain-size)
+					(setf select-var i)
+					(setf minimum-domain-size aux)
+				  )
+			)
+		)
+	select-var)
+)
+
+
+; ADD INFERENCES
+
+; Add inferences to our psr.
+
+(defun AddInferences (psr inferencias)
+	(let
+		(
+			(lista (inferencia-lista inferencias))
+			(dom nil)
+		)
+		(dolist (i lista)
+			(setf dom (psr-variavel-dominio psr (car i)))
+			(psr-altera-dominio! psr (car i) (cdr i))
+			(setf (cdr i) dom)
+		)
+	)		
+)
+
+
+; GET INFERENCE DOMAIN
+
+; Return the Domain of an inference associated to some variable.
+
+(defun GetInferenceDomain (var inferencias)
+	(let
+		(
+			(lista (inferencia-lista inferencias))
+	    (flag -1) 
+	  )
+		(dolist (i lista)
+			(cond ((equal var (car i))
+					(return-from GetInferenceDomain (cdr i)))))
+		flag
+	)
+)
+
+
+
+; UPDATE INFERENCE DOMAIN
+
+; Update the Inference Domain with a new one.
+
+(defun UpdInferenceDomain(var dominio inferencias)
+	(let ( (lista (inferencia-lista inferencias))
+	     )
+		(dolist (i lista)
+				(cond ((equal var (car i))
+						(setf (cdr i) dominio)
+						(return-from UpdInferenceDomain))))
+		(setf (inferencia-lista inferencias) (cons (cons var dominio) (inferencia-lista inferencias)))
+	)
+)
+
+
+
+; REVISE
+
+; Successful attempt for making x and y arc consistent.
+
+(defun revise(psr x y inferencias)
+	(let ((testesTotais 0) 
+	      (revised nil) 
+	      (dominio-x nil) 
+	      (dominio-y nil) 
+	      (novo-dominio-x nil) 
+	      (foundConsistentValue nil) 
+	      (aux nil)
+	     )
+		(setf aux (GetInferenceDomain x inferencias))
+		(if (not (equal aux -1)) (setf dominio-x aux)
+				  (setf dominio-x (copy-list (psr-variavel-dominio psr x)))
+		)
+		(setf novo-dominio-x dominio-x)
+		(setf aux (GetInferenceDomain y inferencias))
+		(if (psr-variavel-valor psr y) (setf dominio-y (list (psr-variavel-valor psr y)))
+			(if (not (equal aux -1)) (setf dominio-y aux)
+						(setf dominio-y (copy-list (psr-variavel-dominio psr y)))
+			)
+		)
+		(dolist (vx dominio-x)
+			(setf foundConsistentValue nil)
+			(dolist (vy dominio-y)
+				(setf aux (multiple-value-list (psr-atribuicoes-consistentes-arco-p psr x vx y vy)))
+				(setf testesTotais (+ testesTotais (nth 1 aux)))
+				(cond ((nth 0 aux)
+					(setf foundConsistentValue T) (return))))
+			(cond ((not foundConsistentValue)
+				(setf revised T)
+				(setf novo-dominio-x (remove vx novo-dominio-x :test #'equal)))))
+		(if (equal revised T)
+			(UpdInferenceDomain x novo-dominio-x inferencias)
+			)
+	(values revised testesTotais)
+	)
+)
+
+
+
+; ARCOS VIZINHOS NAO ATRIBUIDOS
+
+; Search for non assigned neighbors in arc.
+
+(defun arcos-vizinhos-nao-atribuidos(psr var)
+	(let ((result nil))
+		(dolist (var-natribuida (psr-variaveis-nao-atribuidas psr))
+			(cond
+				(
+					(not (equal var var-natribuida))
+					(dolist (i (psr-variavel-restricoes psr var))
+						(cond
+							(
+								(and
+									(membro var-natribuida (restricao-variaveis i))
+									(not(membro (cons var-natribuida var) result))
+								)
+									(setf
+										result
+										(append
+											result
+											(list (cons var-natribuida var)))
+									)
+							)
+						)
+					)
+				)
+			)
+		)
+		result
+	)
+)
+
+
+
+; FOWARD CHECKING
+
+; The simpler technique for evaluating the effect of a specific assignment to a variable.
+; Initially a variable is instantiated to a value from its domain.
+; Then repeatedly at each step, next variable is instantiated to a value that is
+; consistent with the previous assignments.
+;
+; Different than backtracking, while assigning a value to the current variable,
+; arc consistency between the current variable and the uninstantiated variables
+; are maintained. By this way, current variable cannot take a value that causes
+; an empty domain for one of the uninstantiated variables.
+; If there is not such a value, then the algorithm backtracks to the point where
+; it can start a new branch.
+
+(defun forward-checking(psr var)
+	(let
+		(
+			(inferencias (make-inferencia))
+			(testesTotais 0)
+			(lista-arcos (arcos-vizinhos-nao-atribuidos psr var))
+			(aux nil)
+		)
+		(dolist (arco lista-arcos)
+			(setf aux (multiple-value-list (revise psr (car arco) (cdr arco) inferencias)))
+			(setf testesTotais (+ testesTotais (nth 1 aux)))
+			(cond ((nth 0 aux)
+					(if (equal (length (GetInferenceDomain (car arco) inferencias)) 0)	
+						(return-from forward-checking (values nil testesTotais))))))
+	(values inferencias testesTotais)
+	)
+)
+
+
+
+; PROCURA RETROCESSO FC MRV
+
+; This search choose as the first variable to be chosen by the one that has the
+; smallest field.
+; If more than one variable with minimum domain it will be chosen to appear as
+; first in the list of unassigned variables.
+;
+; The function as it is, is a backtracking search using Forward Checking mechanism 
+; and MRV (Minimum Remaining Value) Heuristic into the PSR.
+
+(defun procura-retrocesso-fc-mrv (psr)
+	(let ((testesTotais 0) (res nil) (res1 nil) (var nil) (inf nil))
+		(cond ((psr-completo-p psr) 
+			(return-from procura-retrocesso-fc-mrv (values psr testesTotais))))
+		(setf var (min-remaining-values psr))
+		(dolist (atr (psr-variavel-dominio psr var))
+			(setf res1 (multiple-value-list (psr-atribuicao-consistente-p psr var atr)))
+			(setf testesTotais (+ testesTotais (nth 1 res1)))
+			(cond ((nth 0 res1)
+				(psr-adiciona-atribuicao! psr var atr)
+				(setf res1 (multiple-value-list (forward-checking psr var)))
+			
+				(setf testesTotais (+ testesTotais (nth 1 res1)))
+				(setf inf (nth 0 res1))
+				(cond (inf
+					(AddInferences psr inf)
+					(setf res1 (multiple-value-list (procura-retrocesso-fc-mrv psr)))
+					(setf res (nth 0 res1))
+					(setf testesTotais (+ testesTotais (nth 1 res1)))
+					(cond ((not (equal res nil)) 
+						(return-from procura-retrocesso-fc-mrv (values res testesTotais))))
+					(AddInferences psr inf)))
+				(psr-remove-atribuicao! psr var))))
+	(values nil testesTotais)
+	)
+)
+
+
+
+; EXPANDS LIST
+
+; Expands the list in arc iteratively.
+
+(defun ExpandsList (psr lista inferencia)
+	(let (
+		  (testesTotais 0) 
+		  (aux nil) 
+		  (inferencias inferencia) 
+		  (lista-arcos lista) 
+		  (return-arcos nil) 
+		  (novos-arcos nil)
+		 )
+		(dolist (arco lista-arcos)
+			(setf aux (multiple-value-list (revise psr (car arco) (cdr arco) inferencias)))
+			(setf testesTotais (+ testesTotais (nth 1 aux)))
+			(cond ((nth 0 aux)
+				(if (equal (length (GetInferenceDomain (car arco) inferencias)) 0)
+					(return-from ExpandsList (values nil testesTotais return-arcos inferencia)))
+				(setf novos-arcos (arcos-vizinhos-nao-atribuidos psr (car arco)))
+				(setf novos-arcos (remove (cons (cdr arco) (car arco)) novos-arcos :test 'equal))
+				(setf return-arcos (append return-arcos novos-arcos)))
+			)
+		)
+		(values T testesTotais return-arcos inferencia)
+	)
+)
+
+
+
+; MAC (Maintain Arc Consistency)
+
+; This functions propagates variables restrictions of the psr.
+
+(defun MAC (psr var)
+	(let ((testesTotais 0) 
+		   (inferencias (make-inferencia)) 
+		   (lista-arcos (arcos-vizinhos-nao-atribuidos psr var))
+		   (aux NIL) 
+		   (repeat NIL)
+		 )
+		(loop do
+			(setf aux (multiple-value-list (ExpandsList psr lista-arcos inferencias)))
+			(setf repeat(nth 0 aux))
+			(setf testesTotais (+ testesTotais (nth 1 aux)))
+			(setf lista-arcos (nth 2 aux))
+			(setf inferencias (nth 3 aux))
+			(if (not repeat)
+				(return-from MAC (values nil testesTotais))
+			)
+			while(not (null lista-arcos))
+		) 
+		(values inferencias testesTotais)
+	)
+)
+
+
+
+; PROCURA RETROCESSO MAC MRV
+
+; Search for regression solving the CSP used by MAC (Maintain Arc Consistency)
+; function and applying MRV heuristic model.
+
+(defun procura-retrocesso-mac-mrv(psr)
+	(let ((testesTotais 0) (res nil) (res1 nil) (var nil) (inf nil))
+		(cond ((psr-completo-p psr) 
+			(return-from procura-retrocesso-mac-mrv (values psr testesTotais))))
+		(setf var (min-remaining-values psr))	
+		(dolist (atr (psr-variavel-dominio psr var))
+			(setf res1 (multiple-value-list (psr-atribuicao-consistente-p psr var atr)))
+			(setf testesTotais (+ testesTotais (nth 1 res1)))			
+			(cond ((nth 0 res1)
+				(psr-adiciona-atribuicao! psr var atr)
+				(setf res1 (multiple-value-list (MAC psr var)))
+				(setf testesTotais (+ testesTotais (nth 1 res1)))
+				(setf inf (nth 0 res1))
+				(cond (inf
+					(AddInferences psr inf)
+					(setf res1 (multiple-value-list (procura-retrocesso-mac-mrv psr)))
+					(setf res (nth 0 res1))
+					(setf testesTotais (+ testesTotais (nth 1 res1)))
+					(cond ((not (equal res nil)) 
+						(return-from procura-retrocesso-mac-mrv (values res testesTotais))))
+					(AddInferences psr inf)))
+				(psr-remove-atribuicao! psr var))))
+	(values nil testesTotais)))
+
+
+
+; RESOLVE BEST
+
+; Use the Best Algorithm to solve the received Fill-a-Pix.
+
+(defun resolve-best (arr)
+	(psr->fill-a-pix
+		(procura-retrocesso-fc-mrv
+			(fill-a-pix->psr arr)
+		)
+		(array-dimension arr 0)
+		(array-dimension arr 1)
+	)
+)
