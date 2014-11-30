@@ -9,16 +9,14 @@
 ; Francisco Maria Calisto
 ; 70916
 
-
-
 ; ======================================================================================= ;
 ;                                             NOTAS                                       ;
 ; ======================================================================================= ;
 
-;; Test using "clisp -i tipos_de_dados.lisp -i exemplos.lisp < test01/input" by RZL
+; How to Test: 
 
-
-
+; ex.
+; clisp -i tipos_de_dados.lisp -i exemplos.lisp < test01/input
 
 ; ======================================================================================= ;
 ;                                             LOAD                                        ;
@@ -28,12 +26,11 @@
 
 ;;;; =====> UNCOMMENT AS YOU NEED <===== ;;;;
 
+(load "exemplos.fas")
 
-;; (load "exemplos.fas")
+; (load "exemplos.lisp")
 
-(load "exemplos.lisp")
-
-
+; (compile-file "exemplos.lisp")
 
 
 ; ======================================================================================= ;
@@ -46,7 +43,6 @@
     (pred NIL)
 )
 
-
 ; HASHTABLE GLOBAL
 
 ; The variables of our PSR will serve to index the Hashtable
@@ -54,8 +50,6 @@
 
 (defparameter myhashtable (make-hash-table :test 'equal))
 (defparameter hashtable2 (make-hash-table :test 'equal))
-
-
 
 
 ; ======================================================================================= ;
@@ -67,8 +61,6 @@
 ; ======================================================================================= ;
 
 
-
-
 ; ======================================================================================= ;
 ;                                        TIPO RESTRICAO                                   ;
 ; ======================================================================================= ;
@@ -76,7 +68,6 @@
 ; The restriction type has as arguments a list of variables and a predicate that evaluates
 ; whether a CSP is valid or not.
 ; The predicate will have to call the function check-CSP so that build the constraint.
-
 
 (defun cria-restricao (lstvars predi)
 	(let ((x NIL) )
@@ -86,19 +77,33 @@
 	x)
 )
 
-
 (defun restricao-variaveis (r)
 	(
 		restricao-listvars r
 	)
 )
 
-
 (defun restricao-funcao-validacao (r)
 	(
 		restricao-pred r
 	)
 )
+
+
+; ======================================================================================= ;
+;                                              PSR                                        ;
+; ======================================================================================= ;
+
+; The Satisfaction Problem Constrained (PSR) type is used to represent
+; one problem satisfaction of restrictions, which stores information about the variables,
+; domains and restrictions of a Satisfaction Problem of Constrained (PSR).
+
+; USED LISTS
+
+; listvars       - Variables list;
+; listdomains    - Domains list;
+; listconstrains - Constrains list;
+; listvalues     - Assignment List.
 
 (defstruct PSR
     (listvars NIL)
@@ -107,26 +112,6 @@
     
     (listvalues NIL)
 )
-
-
-
-
-; ======================================================================================= ;
-;                                              PSR                                        ;
-; ======================================================================================= ;
-
-; The Satisfaction Problem type Constrained (PSR) and used to represent
-; one problem satisfaction of restrictions, which stores information about the variables,
-; domains and restrictions of a Satisfaction Problem of Constrained (PSR).
-
-
-; LISTAS A USAR
-
-; listvars       - Variables list;
-; listdomains    - Domains list;
-; listconstrains - Constrains list;
-; listvalues     - Assignment List.
-
 
 ; CRIA PSR
 
@@ -141,9 +126,11 @@
 				(x NIL)
 				)
 			(dotimes (i maxsz varsl)
-				(setf (gethash (nth i varsl) myhashtable) NIL)
-				
+				(progn
+					(setf (gethash (nth i varsl) myhashtable) NIL)
+					(setf (gethash (nth i varsl) hashtablevals) i)
 				)
+			)
 						
 				(dotimes (i maxsz varsl)
 				(setf valuesl (append valuesl (list NIL)))
@@ -158,7 +145,6 @@
 	)	
 )
 
-
 ; ATRIBUICOES DO PSR
 
 ; Receives a PSR, and returns a list of all the PSR assignments.
@@ -171,7 +157,6 @@
   		collect (cons item (nth idx lst2))
   )
 )
-
 
 (defun psr-atribuicoes (psr)
 	(let
@@ -199,7 +184,6 @@
 	)
 )
 
-
 ; VARIAVEIS PSR
 
 ; Receives a PSR and returns a list of all the PSR variables,
@@ -208,7 +192,6 @@
 (defun psr-variaveis-todas (psr)
 	(PSR-listvars psr)
 )
-
 
 ; VARIAVEIS NAO ATRIBUIDAS
 
@@ -227,7 +210,6 @@
 	)
 )
 
-
 ; VALOR DA VARIAVEL
 
 ; Selector receives a PSR and a variable.
@@ -235,20 +217,14 @@
 ; If the variable is not assigned, and returned NIL.
 
 (defun psr-variavel-valor (psr var)
-(let ((maxsz (list-length (PSR-listvars psr)))
-      (answ NIL) 
-       
-     )
-      ;;(defvar answ) 
-       (dotimes (i maxsz (PSR-listvars psr))
-            (if (equal (nth i (PSR-listvars psr)) var)
-			(setf answ (nth i (PSR-listvalues psr)))
-            			)
-            )
-    answ	    
-    )      
+		(let
+			(
+				(ans NIL)
+			)
+      (setf ans (gethash var hashtablevals))
+      (nth ans (PSR-listvalues psr))
+      )
 )
-
 
 ; DOMINIO DA VARIAVEL
 
@@ -267,7 +243,6 @@
     		answ2
     )
 )
-
 
 ; RESTRICOES DA VARIAVEL
 
@@ -303,24 +278,15 @@
 
 ; ADICIONA ATRIBUICAO
 
-; This modifier receives an RSP, a variable and a value,
+; This modifier receives an PSR, a variable and a value,
 ; and changes the PSR received, assigning the value to variable.
 ; If the variable already had been assigned, the new value replaces the previous value.
 ; The return value of this function is not defined.
 
-
 (defun psr-adiciona-atribuicao! (psr var val)
-	(let ((maxsz (list-length (PSR-listvars psr))) )
-				(setf (gethash var myhashtable)
-							val)
-				(dotimes (i maxsz );;(PSR-listvars psr))
-					(if (equal (nth i (PSR-listvars psr)) var)
-						(setf (nth i (PSR-listvalues psr)) val)
-					)
-				)
-	)
+	(setf psr psr)
+	(setf (nth (gethash var hashtablevals) (PSR-listvalues psr)) val)
 )
-
 
 ; REMOVE ATRIBUICAO
 
@@ -330,23 +296,10 @@
 ; The variable effectively becomes not be assigned.
 ; The return value of this function is not defined.
 
-
-(defun psr-remove-atribuicao! (psr var) 
-	(let
-		(
-			(maxsz (list-length (PSR-listvars psr)))
-		)
-		(dotimes (i maxsz (PSR-listvars psr))
-			(if (equal (nth i (PSR-listvars psr)) var) 
-				(setf
-					(nth i (PSR-listvalues psr))
-					NIL
-				)
-			)
-		)
-	)
+(defun psr-remove-atribuicao! (psr var)
+	(setf psr psr)
+	(setf (nth (gethash var hashtablevals) (PSR-listvalues psr)) NIL)
 )
-
 
 ; ALTERA DOMINIO
 
@@ -355,7 +308,6 @@
 ; changing the domain associated with the received variable,
 ; so that it will be the domain received.
 ; The return value of this function is not defined.
-
 
 (defun psr-altera-dominio! (psr var dom)
 	(let ((maxsz (list-length (PSR-listvars psr))) )
@@ -366,7 +318,6 @@
 		)
 	)
 )
-
 
 ; PSR COMPLETO
 
@@ -393,7 +344,6 @@
 		)
 	)
 )
-
 
 ; PSR CONSISTENTE
 
@@ -428,7 +378,6 @@
 		)
 	)
 )
-
 
 
 ; PSR VARIAVEL CONSISTENTE
@@ -469,8 +418,6 @@
 	(values T count)
 	)
 )
-
-
 
 
 ; PSR ATRIBUICAO CONSISTENTE
@@ -517,6 +464,14 @@
 )
 
 
+; MY MEMBER
+
+; Verify if an elem is in the list.
+
+(defun my-member (elem lista)
+	(cond ((null lista) nil)
+		((equal elem (first lista)) T)
+		(T (my-member elem (rest lista)))))
 
 
 ; PSR ATRIBUICOES CONSISTENTES EM ARCO
@@ -577,8 +532,6 @@
 )
 
 
-
-
 ; ======================================================================================= ;
 ;                                    FUNCOES DE CONVERSAO                                 ;
 ; ======================================================================================= ;
@@ -608,6 +561,8 @@
 ;
 ; Finally creates the PSR with the arguments of the new variables list,
 ; domains list and restrictions list.
+
+; GET NEIGHBOURS OF ARRAY CELL
 
 (defun GetNeighboursOfArrayCell (arr i j)
 	(let
@@ -678,6 +633,7 @@
 	)
 )
 
+; CRIA PREDICADO
 
 (defun CriaPredicado (arr i j)
 	(let
@@ -712,6 +668,8 @@
 	)
 )
 
+
+; TURNS FILL-A-PIX TO PSR 
 
 (defun fill-a-pix->psr (arr)
 	(let
@@ -778,11 +736,11 @@
 )
 
 
-; TRANSFORMA PSR EM FILL-A-PIX
+; TURNS PSR TO FILL-A-PIX
 
 ; The PSR receives a fixed, an integer representing the number of lines l,
 ; and another that represents the number of columns c, and returns a two-dimensional array
-; l rows and c columns, containing for each position row/column in assigning
+; lin rows and col columns, containing for each position row/column in assigning
 ; the corresponding PSR variable.
 ; In this implementation was only necessary to create the name of the variable,
 ; which is the variable value of the index of our PSR in string.
@@ -807,12 +765,9 @@
 )
 
 
-
-
 ; ======================================================================================= ;
 ;                               PROCURA RETROCESSO SIMPLES                                ;
 ; ======================================================================================= ;
-
 
 ; PROCURA RETROCESSO SIMPLES
 
@@ -881,7 +836,6 @@
 	)
 )
 
-
 ; RESOLVE SIMPLES
 
 ; Takes an array with a Fill-a-Pix puzzle to be solved, try to solve it using the
@@ -900,8 +854,6 @@
 )
 
 
-
-
 ; ======================================================================================= ;
 ; ======================================================================================= ;
 ;                                                                                         ;
@@ -909,9 +861,6 @@
 ;                                                                                         ;
 ; ======================================================================================= ;
 ; ======================================================================================= ;
-
-
-
 
 ; ======================================================================================= ;
 ;                                PROCURAS MAIS AVANCADAS                                  ;
@@ -937,7 +886,6 @@
 		counter	
 	)
 )
-
 
 ; RE-COMPUTE DEGREE OF
 
@@ -970,7 +918,6 @@
 	)	
 )
 
-
 ; GRAU VARS NAO ATRIBUIDAS
 
 ; Calculate the Degree of non attributed variables.
@@ -1002,7 +949,6 @@
 	)
 )
 
-
 ; RE-CALCULATE GLOBAL DEGREES
 
 ; It re-calculate the global degrees and sort it.
@@ -1021,13 +967,12 @@
 	)
 )
 
-
 ; PROCURA RETROCESSO GRAU
 
 ; The idea of this function is to backtrack search using Maximum Degree Heuristic
 ; implemented with support of auxiliar function:
 ; 
-; ReCalculateGlobalDegrees: re-calculate the global degrees of the pair list;
+; ReCalculateGlobalDegrees - re-calculate the global degrees of the pair list;
 
 (defun procura-retrocesso-grau (psr)
 	(let
@@ -1090,7 +1035,6 @@
 )
 
 
-
 ; INFERENCIA
 
 ; Inference function is a list of inferences.
@@ -1098,7 +1042,6 @@
 (defstruct inferencia 
 	(lista nil)
 )
-
 
 ; MINIMUM REMAINING VALUES
 
@@ -1126,7 +1069,6 @@
 	select-var)
 )
 
-
 ; ADD INFERENCES
 
 ; Add inferences to our psr.
@@ -1144,7 +1086,6 @@
 		)
 	)		
 )
-
 
 ; GET INFERENCE DOMAIN
 
@@ -1164,7 +1105,6 @@
 )
 
 
-
 ; UPDATE INFERENCE DOMAIN
 
 ; Update the Inference Domain with a new one.
@@ -1176,10 +1116,15 @@
 				(cond ((equal var (car i))
 						(setf (cdr i) dominio)
 						(return-from UpdInferenceDomain))))
-		(setf (inferencia-lista inferencias) (cons (cons var dominio) (inferencia-lista inferencias)))
+		(setf
+			(inferencia-lista inferencias)
+			(cons
+				(cons var dominio)
+				(inferencia-lista inferencias)
+			)
+		)
 	)
 )
-
 
 
 ; REVISE
@@ -1224,13 +1169,15 @@
 )
 
 
-
 ; ARCOS VIZINHOS NAO ATRIBUIDOS
 
 ; Search for non assigned neighbors in arc.
 
 (defun arcos-vizinhos-nao-atribuidos(psr var)
-	(let ((result nil))
+	(let
+		(
+			(result nil)
+		)
 		(dolist (var-natribuida (psr-variaveis-nao-atribuidas psr))
 			(cond
 				(
@@ -1239,14 +1186,15 @@
 						(cond
 							(
 								(and
-									(membro var-natribuida (restricao-variaveis i))
-									(not(membro (cons var-natribuida var) result))
+									(my-member var-natribuida (restricao-variaveis i))
+									(not(my-member (cons var-natribuida var) result))
 								)
 									(setf
 										result
 										(append
 											result
-											(list (cons var-natribuida var)))
+											(list (cons var-natribuida var))
+										)
 									)
 							)
 						)
@@ -1257,7 +1205,6 @@
 		result
 	)
 )
-
 
 
 ; FOWARD CHECKING
@@ -1293,7 +1240,6 @@
 )
 
 
-
 ; PROCURA RETROCESSO FC MRV
 
 ; This search choose as the first variable to be chosen by the one that has the
@@ -1306,19 +1252,21 @@
 
 (defun procura-retrocesso-fc-mrv (psr)
 	(let ((testesTotais 0) (res nil) (res1 nil) (var nil) (inf nil))
-		(cond ((psr-completo-p psr) 
-			(return-from procura-retrocesso-fc-mrv (values psr testesTotais))))
+		(if (psr-completo-p psr) 
+			(return-from procura-retrocesso-fc-mrv (values psr testesTotais)))
 		(setf var (min-remaining-values psr))
 		(dolist (atr (psr-variavel-dominio psr var))
 			(setf res1 (multiple-value-list (psr-atribuicao-consistente-p psr var atr)))
 			(setf testesTotais (+ testesTotais (nth 1 res1)))
-			(cond ((nth 0 res1)
+			(if (nth 0 res1)
+				(progn
 				(psr-adiciona-atribuicao! psr var atr)
 				(setf res1 (multiple-value-list (forward-checking psr var)))
 			
 				(setf testesTotais (+ testesTotais (nth 1 res1)))
 				(setf inf (nth 0 res1))
-				(cond (inf
+				(if inf
+					(progn
 					(AddInferences psr inf)
 					(setf res1 (multiple-value-list (procura-retrocesso-fc-mrv psr)))
 					(setf res (nth 0 res1))
@@ -1330,7 +1278,6 @@
 	(values nil testesTotais)
 	)
 )
-
 
 
 ; EXPANDS LIST
@@ -1362,7 +1309,6 @@
 )
 
 
-
 ; MAC (Maintain Arc Consistency)
 
 ; This functions propagates variables restrictions of the psr.
@@ -1388,7 +1334,6 @@
 		(values inferencias testesTotais)
 	)
 )
-
 
 
 ; PROCURA RETROCESSO MAC MRV
@@ -1421,17 +1366,183 @@
 	(values nil testesTotais)))
 
 
+; ======================================================================================= ;
+;                                RESOLVE-BEST HEURISTICS                                  ;
+; ======================================================================================= ;
+
+; INIT PSR
+
+; Initialize the PSR from a Fill-a-Pix puzzle.
+
+(defun InitPSR (arr)
+	(fill-a-pix->psr arr)
+)
+
+
+; EXPLORE PSR CONSTRAINS
+
+; Evaluates if the PSR has duplicate entrys of constrains variables and compares the
+; length with the length of the non assigned variables of the PSR.
+
+(defun ExplorePSRconstr (psr)
+	(let ( (lstaux (psr-listconstrains psr))
+			(listfin NIL)
+			)
+		(dotimes (i (list-length lstaux))
+			(setf listfin (append listfin (restricao-variaveis (nth i lstaux) )) )
+		)
+	(setf listfin (remove-duplicates listfin))
+	(if (> (list-length (psr-variaveis-nao-atribuidas psr)) (list-length listfin))		
+	(setf listfin (set-difference (psr-variaveis-nao-atribuidas psr) listfin :test 'equal))
+	(setf listfin (set-difference listfin (psr-variaveis-nao-atribuidas psr) :test 'equal))
+	)
+	listfin
+	)
+)
+
+
+; GET NINES AND ZEROS
+
+; Search the nines and zeros values into the neighbours of the Array.
+
+(defun GetNinesAndZeros (arr)
+	(let (  (lines (array-dimension arr 0))
+		    (columns (array-dimension arr 1))
+		    (listNines NIL)
+		    (listZeros NIL)
+			)
+		
+		 (dotimes (i lines)
+			(dotimes (j columns)
+				(progn
+					(if (equal (aref arr i j) 9)
+						(setf listNines (append listNines  (GetNeighboursOfArrayCell arr i j)) )
+					)
+					(if (equal (aref arr i j) 0)
+						(setf listZeros (append listZeros (GetNeighboursOfArrayCell arr i j)) )
+					)
+				)
+			)
+		)
+		(cons listNines listZeros)
+	)
+)
+
+
+; PRE-PROCESS CORNERS
+
+; Process the Array Corners using the GetNeighboursOfArrayCell function to
+; calculate the position of the corner.
+
+(defun PreProcessCorners (arr)
+	(let
+		(
+			(tlc (cons 0 0))
+	    (trc (cons 0 (- (array-dimension arr 1) 1)) )
+	    (blc (cons (- (array-dimension arr 0) 1) 0) )
+	    (brc (cons (- (array-dimension arr 0) 1) (- (array-dimension arr 1) 1)) )
+	    (listCorners NIL)
+		)
+			
+		(if (equal (aref arr (car tlc) (cdr tlc) ) 4)
+			(setf
+				listCorners
+				(append
+					listCorners
+					(GetNeighboursOfArrayCell arr (car tlc) (cdr tlc))
+				)
+			)
+		)
+		
+		(if (equal (aref arr (car trc) (cdr trc) ) 4)
+			(setf
+				listCorners
+				(append
+					listCorners
+					(GetNeighboursOfArrayCell arr (car trc) (cdr trc))
+				)
+			)
+		)
+		
+		(if (equal (aref arr (car blc) (cdr blc) ) 4)
+			(setf
+				listCorners
+				(append
+					listCorners
+					(GetNeighboursOfArrayCell arr (car blc) (cdr blc))
+				)
+			)
+		)
+		
+		(if (equal (aref arr (car brc) (cdr brc) ) 4)
+			(setf
+				listCorners
+				(append
+					listCorners
+					(GetNeighboursOfArrayCell arr (car brc) (cdr brc))
+				)
+			)
+		)
+		listCorners				
+	)
+)
+
+
+; ADD ATRIBUTIONS TO CORNERS
+
+; Add the respective atributions to the corners of the Array.
+
+(defun AddAtributionsToCorners (psr arr)
+	(let ( (listaCorners (PreProcessCorners arr))
+		)
+		 (dotimes (j (list-length listaCorners))
+			(psr-adiciona-atribuicao! psr (nth j listaCorners) 1)
+		 )
+	NIL			
+	)
+)
+
+
+; PRE-PROCESS ZEROS AND NINES
+
+; Pre-Process the Zeros and Nines using the aux functions created for it.
+
+(defun PreProcessZerosAndNines (arr psr)
+	(let ( (lista1 (car (GetNinesAndZeros arr)))
+	        (lista2 (cdr (GetNinesAndZeros arr)))
+	
+			)
+		(dotimes (i (list-length lista1))
+			(psr-adiciona-atribuicao! psr (nth i lista1) 1)
+		)
+		
+		(dotimes (i (list-length lista2))
+			(psr-adiciona-atribuicao! psr (nth i lista2) 0)
+		)
+	NIL		
+	)
+)
 
 ; RESOLVE BEST
 
 ; Use the Best Algorithm to solve the received Fill-a-Pix.
 
 (defun resolve-best (arr)
-	(psr->fill-a-pix
-		(procura-retrocesso-fc-mrv
-			(fill-a-pix->psr arr)
+	(let
+		(
+			(psr1 NIL)
 		)
-		(array-dimension arr 0)
-		(array-dimension arr 1)
+			
+		(setf psr1 (InitPSR arr))
+		(ExplorePSRconstr psr1)
+		(GetNinesAndZeros arr)
+		(PreProcessZerosAndNines arr psr1)
+		(PreProcessCorners arr)
+		(AddAtributionsToCorners psr1 arr)
+		(psr->fill-a-pix
+			(procura-retrocesso-fc-mrv psr1)
+			(array-dimension arr 0)
+			(array-dimension arr 1)
+		)
 	)
 )
