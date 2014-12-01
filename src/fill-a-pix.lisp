@@ -9,29 +9,7 @@
 ; Francisco Maria Calisto
 ; 70916
 
-; ======================================================================================= ;
-;                                             NOTAS                                       ;
-; ======================================================================================= ;
-
-; How to Test: 
-
-; ex.
-; clisp -i tipos_de_dados.lisp -i exemplos.lisp < test01/input
-
-; ======================================================================================= ;
-;                                             LOAD                                        ;
-; ======================================================================================= ;
-
-; Invocation of test files.
-
-;;;; =====> UNCOMMENT AS YOU NEED <===== ;;;;
-
 (load "exemplos.fas")
-
-; (load "exemplos.lisp")
-
-; (compile-file "exemplos.lisp")
-
 
 ; ======================================================================================= ;
 ;                               DEFINICAO DAS ESTRUTURAS DE DADOS                         ;
@@ -48,9 +26,19 @@
 ; The variables of our PSR will serve to index the Hashtable
 ; and this way we can access the respective values at a lower cost.
 
+; Given a place in the game board this returns the variable
+; associated with that place:
 (defparameter myhashtable (make-hash-table :test 'equal))
 (defparameter hashtable2 (make-hash-table :test 'equal))
 
+; Given a variable speeds up the retrieve of its value:
+(defparameter hashtablevals (make-hash-table :test 'equal))
+
+; Speeds up domain retrieval:
+(defparameter hashtabledoms (make-hash-table :test 'equal))
+
+; Speeds up constrains checking:
+(defparameter hashtableconstr (make-hash-table :test 'equal))
 
 ; ======================================================================================= ;
 ; ======================================================================================= ;
@@ -121,14 +109,18 @@
 ; structures and return NIL.
 
 (defun cria-psr (varsl domainsl constrainsl)
-	(let ((maxsz (list-length varsl)) 
+	(let ((maxsz (list-length varsl))
+			(maxsz2 (list-length constrainsl))
 				(valuesl NIL)
 				(x NIL)
+				(answ3 NIL)
 				)
 			(dotimes (i maxsz varsl)
 				(progn
 					(setf (gethash (nth i varsl) myhashtable) NIL)
 					(setf (gethash (nth i varsl) hashtablevals) i)
+					(setf (gethash (nth i varsl) hashtabledoms) i)
+					(setf (gethash (nth i varsl) hashtableconstr) NIL)
 				)
 			)
 						
@@ -141,6 +133,27 @@
 						:listdomains domainsl
 						:listconstrains constrainsl
 						:listvalues valuesl))
+			
+			(dotimes (j maxsz varsl)
+				(dotimes (i maxsz2 constrainsl)
+					(progn
+						(if (not
+									(equal
+										(member (nth j varsl)
+											(restricao-variaveis (nth i constrainsl))
+											:test
+											'equal
+										)
+										NIL
+									)
+								)
+							(setf answ3 (append answ3 (list (nth i constrainsl))))
+						)
+					)
+				)
+				(setf (gethash (nth j varsl) hashtableconstr) answ3)
+				(setf answ3 NIL)
+			)
 	x					
 	)	
 )
@@ -231,17 +244,14 @@
 ; Returns the corresponding domain to that variable.
 
 (defun psr-variavel-dominio (psr key)
-    (defparameter *myhashtable* (make-hash-table :test 'equal))
-    (let ((maxsz (list-length (PSR-listvars psr)))
-           (answ2 NIL)
-     			)
-				(dotimes (i maxsz (PSR-listvars psr))
-	    		(if (equal (nth i (PSR-listvars psr)) key)
-						(setf answ2 (nth i (PSR-listdomains psr)))
-	     		)
-    		)
-    		answ2
-    )
+		(let ( (ans NIL)
+		
+				)
+				
+		(setf psr psr)
+      (setf ans (gethash key hashtabledoms))
+      (nth ans (PSR-listdomains psr))
+      )
 )
 
 ; RESTRICOES DA VARIAVEL
@@ -249,30 +259,14 @@
 ; Returns a list of all restrictions applicable to this variable.
 
 (defun psr-variavel-restricoes (psr key)
-    (defparameter *myhashtable* (make-hash-table :test 'equal))
-    (let ((maxsz (list-length (PSR-listconstrains psr)))
-          (answ3 NIL) 
-     			)
-	
-	(setf answ3 NIL)
-       
-       (dotimes (i maxsz (PSR-listconstrains psr))
-            (if (not
-            			(equal
-            				(member key
-            								(restricao-listvars
-            									(nth i (PSR-listconstrains psr)))
-            									:test 'equal)
-            				NIL
-            			)
-            		)
-							(setf answ3 (append answ3 (list (nth i (PSR-listconstrains psr)))))
-            
-            )
-            
-            )
-	    answ3
-    )
+    (let ( (ans NIL)
+		
+				)
+				
+		(setf psr psr)
+      (setf ans (gethash key hashtableconstr)) 
+      ans
+      )
 )
 
 
@@ -310,13 +304,13 @@
 ; The return value of this function is not defined.
 
 (defun psr-altera-dominio! (psr var dom)
-	(let ((maxsz (list-length (PSR-listvars psr))) )
-		(dotimes (i maxsz (PSR-listvars psr))
-			(if (equal (nth i (PSR-listvars psr)) var) 
-				(setf (nth i (PSR-listdomains psr)) dom)
-			)
-		)
-	)
+	(let ((ans NIL)
+				)
+				
+		(setf psr psr)
+    (setf ans (gethash var hashtabledoms)) 
+    (setf (nth ans (PSR-listdomains psr)) dom)
+  )
 )
 
 ; PSR COMPLETO
@@ -482,47 +476,23 @@
 
 (defun psr-atribuicoes-consistentes-arco-p (psr var1 v1 var2 v2)
 	(if (equal (psr-listconstrains psr) nil)
-		(return-from
-			psr-atribuicoes-consistentes-arco-p
-				(values T 0)
-		)
+		(return-from psr-atribuicoes-consistentes-arco-p (values T 0))
 	)
-
-	(let
-		(
-			(testes 0)
-			(aux1 (psr-variavel-valor psr var1))
-			(aux2 (psr-variavel-valor psr var2))
-		)
-		
-		(if (equal aux1 nil)
-			(setf aux1 nil)
-		)
-		
-		(if (equal aux2 nil)
-			(setf aux2 nil)
-		)
-
+	(let ((testes 0) (aux1 (psr-variavel-valor psr var1)) (aux2 (psr-variavel-valor psr var2)))
+		(if (equal aux1 nil) (setf aux1 nil))
+		(if (equal aux2 nil) (setf aux2 nil))
 		(psr-adiciona-atribuicao! psr var1 v1)
 		(psr-adiciona-atribuicao! psr var2 v2)
-		
 		(dolist (r (psr-variavel-restricoes psr var1))
-			(cond
-				(
-					(membro var2 (restricao-variaveis r))
+			(cond ((my-member var2 (restricao-variaveis r))
 					(incf testes)
-					(cond
-						(
-							(not (funcall (restricao-funcao-validacao r) psr))
-							(psr-adiciona-atribuicao! psr var1 aux1)
-							(psr-adiciona-atribuicao! psr var2 aux2)
-							(return-from
-								psr-atribuicoes-consistentes-arco-p
-									(values nil testes)
-							)
-						)
-				  )
-				)
+					(cond ((not (funcall (restricao-funcao-validacao r) psr))
+						(psr-adiciona-atribuicao! psr var1 aux1)
+						(psr-adiciona-atribuicao! psr var2 aux2)
+						(return-from psr-atribuicoes-consistentes-arco-p (values nil testes))
+						  )
+				    )
+				   )
 			)
 		)
 		(psr-adiciona-atribuicao! psr var1 aux1)
@@ -537,7 +507,7 @@
 ; ======================================================================================= ;
 
 
-; TRANSFORMA FILL-A-PIX EM PSR
+; TURNS FILL-A-PIX IN PSR
 
 ; Receives a corresponding array to a two-dimensional table mxn of a puzzle
 ; Fill-a-Pix unresolved and returns a PSR representing the problem to solve
