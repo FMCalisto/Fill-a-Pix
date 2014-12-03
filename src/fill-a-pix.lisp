@@ -1161,17 +1161,12 @@ the other non-assigned variables which are involved in a constrain with the rece
 
 ; FOWARD CHECKING
 
-; The simpler technique for evaluating the effect of a specific assignment to a variable.
-; Initially a variable is instantiated to a value from its domain.
-; Then repeatedly at each step, next variable is instantiated to a value that is
-; consistent with the previous assignments.
-;
-; Different than backtracking, while assigning a value to the current variable,
-; arc consistency between the current variable and the uninstantiated variables
-; are maintained. By this way, current variable cannot take a value that causes
-; an empty domain for one of the uninstantiated variables.
-; If there is not such a value, then the algorithm backtracks to the point where
-; it can start a new branch.
+#|
+ Given the current partial solution and a candidate assignment to evaluate, it checks whether another variable can take a consistent value. 
+ In other words, it first extends the current partial solution with the tentative value for the considered variable;
+  it then considers every other variable x_k that is still unassigned, and checks whether there exists 
+ an evaluation of x_k that is consistent with the extended partial solution.
+ |#
 
 (defun forward-checking(psr var)
 	(let
@@ -1195,12 +1190,12 @@ the other non-assigned variables which are involved in a constrain with the rece
 ; PROCURA RETROCESSO FC MRV
 
 ; This search choose as the first variable to be chosen by the one that has the
-; smallest field.
-; If more than one variable with minimum domain it will be chosen to appear as
+; smallest domain.
+; If more than one variable has minimum domain it will be chosen the one to appear as
 ; first in the list of unassigned variables.
 ;
 ; The function as it is, is a backtracking search using Forward Checking mechanism 
-; and MRV (Minimum Remaining Value) Heuristic into the PSR.
+; and MRV (Minimum Remaining Value) Heuristic onto the PSR.
 
 (defun procura-retrocesso-fc-mrv (psr)
 	(let ((testesTotais 0) (res nil) (res1 nil) (var nil) (inf nil))
@@ -1234,7 +1229,7 @@ the other non-assigned variables which are involved in a constrain with the rece
 
 ; EXPANDS LIST
 
-; Expands the list in arc iteratively.
+; Expands the list of arcs to gather inferences about a given PSR
 
 (defun ExpandsList (psr lista inferencia)
 	(let (
@@ -1263,7 +1258,7 @@ the other non-assigned variables which are involved in a constrain with the rece
 
 ; MAC (Maintain Arc Consistency)
 
-; This functions propagates variables restrictions of the psr.
+; Ensures that the arc consistency for a given variable is maintained
 
 (defun MAC (psr var)
 	(let ((testesTotais 0) 
@@ -1290,8 +1285,8 @@ the other non-assigned variables which are involved in a constrain with the rece
 
 ; PROCURA RETROCESSO MAC MRV
 
-; Search for regression solving the CSP used by MAC (Maintain Arc Consistency)
-; function and applying MRV heuristic model.
+; Uses the MAC heurisitic to propagate constrains in order to reduce 
+; domain sizes and speed up the solving process
 
 (defun procura-retrocesso-mac-mrv (psr)
 	(let ((testesTotais 0) (res nil) (res1 nil) (var nil) (inf nil))
@@ -1324,7 +1319,7 @@ the other non-assigned variables which are involved in a constrain with the rece
 
 ; INIT PSR
 
-; Initialize the PSR from a Fill-a-Pix puzzle.
+; Create the PSR for a given Fill-a-Pix puzzle.
 
 (defun InitPSR (arr)
 	(fill-a-pix->psr arr)
@@ -1333,8 +1328,7 @@ the other non-assigned variables which are involved in a constrain with the rece
 
 ; EXPLORE PSR CONSTRAINS
 
-; Evaluates if the PSR has duplicate entrys of constrains variables and compares the
-; length with the length of the non assigned variables of the PSR.
+; Finds all the variables which are not involved in any constrain, if any.
 
 (defun ExplorePSRconstr (psr)
 	(let ( (lstaux (psr-listconstrains psr))
@@ -1355,7 +1349,7 @@ the other non-assigned variables which are involved in a constrain with the rece
 
 ; GET NINES AND ZEROS
 
-; Search the nines and zeros values into the neighbours of the Array.
+; Search for the nines and zeros in the array.
 
 (defun GetNinesAndZeros (arr)
 	(let (  (lines (array-dimension arr 0))
@@ -1383,8 +1377,7 @@ the other non-assigned variables which are involved in a constrain with the rece
 
 ; PRE-PROCESS CORNERS
 
-; Process the Array Corners using the GetNeighboursOfArrayCell function to
-; calculate the position of the corner.
+; Pre Process the array corners to account for the existence of the number 4 on it
 
 (defun PreProcessCorners (arr)
 	(let
@@ -1442,7 +1435,7 @@ the other non-assigned variables which are involved in a constrain with the rece
 
 ; ADD ATRIBUTIONS TO CORNERS
 
-; Add the respective atributions to the corners of the Array.
+; Add the respective atributions to the corners of the Array as defined in the PreProcessCorners function.
 
 (defun AddAtributionsToCorners (psr arr)
 	(let ( (listaCorners (PreProcessCorners arr))
@@ -1457,7 +1450,7 @@ the other non-assigned variables which are involved in a constrain with the rece
 
 ; PRE-PROCESS ZEROS AND NINES
 
-; Pre-Process the Zeros and Nines using the aux functions created for it.
+; Pre-Process the Zeros and Nines using the auxiliar functions created for it.
 
 (defun PreProcessZerosAndNines (arr psr)
 	(let ( (lista1 (car (GetNinesAndZeros arr)))
@@ -1477,7 +1470,7 @@ the other non-assigned variables which are involved in a constrain with the rece
 
 ; RESOLVE BEST
 
-; Use the Best Algorithm to solve the received Fill-a-Pix.
+; Uses the Best Algorithm possible to solve the received Fill-a-Pix.
 
 (defun resolve-best (arr)
 	(let
