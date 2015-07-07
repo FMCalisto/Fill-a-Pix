@@ -1,4 +1,4 @@
-# File Exemple
+# File Example
 
 A file of examples was provided along with the statement, which can be used to test 
 your code. To gain access to puzzles example, should copy the file provided for 
